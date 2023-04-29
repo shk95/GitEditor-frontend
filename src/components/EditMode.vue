@@ -17,17 +17,17 @@ export default {
   data() {
     return {
       input: '# hello'
-    };
+    }
   },
   computed: {
     output() {
       return marked(this.input)
     }
   },
-  setup() { },
-  created() { },
-  mounted() { },
-  unmounted() { },
+  setup() {},
+  created() {},
+  mounted() {},
+  unmounted() {},
   methods: {
     update: debounce(function (e) {
       this.input = e.target.value

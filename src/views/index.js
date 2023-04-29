@@ -1,0 +1,5 @@
+export { default as HomeView } from './HomeView.vue'
+export { default as LoginView } from './LoginView.vue'
+export { default as RedirectView } from './RedirectView.vue'
+export { default as Signup } from './Signup.vue'
+export { default as ListView } from './ListView.vue'

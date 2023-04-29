@@ -9,12 +9,12 @@ export default {
   data() {
     return {
       something: ''
-    };
+    }
   },
-  setup() { },
-  created() { },
-  mounted() { },
-  unmounted() { },
+  setup() {},
+  created() {},
+  mounted() {},
+  unmounted() {},
   methods: {}
 }
 </script>
