@@ -6,27 +6,58 @@
           <div v-show="errorMessage" class="alert alert-danger failed">{{ errorMessage }}</div>
           <div class="form-group">
             <label for="username">아이디</label>
-            <input type="text" class="form-control" id="username" v-model="form.username" readonly />
+            <input
+              type="text"
+              class="form-control"
+              id="username"
+              v-model="form.username"
+              readonly
+            />
           </div>
           <div class="form-group">
             <label for="emailAddress">이메일 주소</label>
-            <input type="email" class="form-control" id="emailAddress" v-model="form.emailAddress" readonly />
+            <input
+              type="email"
+              class="form-control"
+              id="emailAddress"
+              v-model="form.emailAddress"
+              readonly
+            />
           </div>
           <div class="form-group">
             <label for="password">비밀번호 재설정</label>
-            <input type="password" class="form-control" id="password" v-model="form.password"
-              @blur="v$.form.password.$touch" />
+            <input
+              type="password"
+              class="form-control"
+              id="password"
+              v-model="form.password"
+              @blur="v$.form.password.$touch"
+            />
             <div class="field-error" v-if="v$.form.password.$dirty">
-              <p class="error" v-for="error of v$.form.password.$errors" :key="error.$uid" v-text="error.$message"></p>
+              <p
+                class="error"
+                v-for="error of v$.form.password.$errors"
+                :key="error.$uid"
+                v-text="error.$message"
+              ></p>
             </div>
           </div>
           <div class="form-group">
             <label for="confirmPassword">비밀번호 확인</label>
-            <input type="password" class="form-control" id="confirmPassword" v-model="form.confirmPassword"
-              @blur="v$.form.confirmPassword.$touch" />
+            <input
+              type="password"
+              class="form-control"
+              id="confirmPassword"
+              v-model="form.confirmPassword"
+              @blur="v$.form.confirmPassword.$touch"
+            />
             <div class="field-error" v-if="v$.form.confirmPassword.$dirty">
-              <p class="error" v-for="error of v$.form.confirmPassword.$errors" :key="error.$uid" v-text="error.$message">
-              </p>
+              <p
+                class="error"
+                v-for="error of v$.form.confirmPassword.$errors"
+                :key="error.$uid"
+                v-text="error.$message"
+              ></p>
             </div>
           </div>
           <div class="form-group">
@@ -39,14 +70,28 @@
           </div>
           <div>
             <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault-github">
-              <label class="form-check-label" for="flexSwitchCheckDefault-github">Using Github</label>
+              <input
+                class="form-check-input"
+                type="checkbox"
+                role="switch"
+                id="flexSwitchCheckDefault-github"
+              />
+              <label class="form-check-label" for="flexSwitchCheckDefault-github"
+                >Using Github</label
+              >
             </div>
           </div>
           <div>
             <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault-chat">
-              <label class="form-check-label" for="flexSwitchCheckDefault-chat">Using ChatGPT</label>
+              <input
+                class="form-check-input"
+                type="checkbox"
+                role="switch"
+                id="flexSwitchCheckDefault-chat"
+              />
+              <label class="form-check-label" for="flexSwitchCheckDefault-chat"
+                >Using ChatGPT</label
+              >
             </div>
           </div>
           <button type="submit" class="btn btn-primary btn-block">변경</button>
@@ -59,7 +104,7 @@
 
 <script>
 import { useVuelidate } from '@vuelidate/core'
-import { required, sameAs, } from '@vuelidate/validators'
+import { required, sameAs } from '@vuelidate/validators'
 
 export default {
   name: 'UserConfig',
@@ -71,13 +116,13 @@ export default {
         emailAddress: '',
         password: '',
         confirmPassword: '',
-        useGithub: '',/* boolen */
+        useGithub: '' /* boolen */,
         gitToken: '',
-        useGpt: '',/* boolen */
+        useGpt: '' /* boolen */,
         gptToken: ''
       },
       errorMessage: ''
-    };
+    }
   },
   setup() {
     return {
@@ -88,22 +133,21 @@ export default {
     return {
       form: {
         username: {
-          required,
+          required
         },
         emailAddress: {
-          required,
+          required
         },
-        password: {
-        },
+        password: {},
         confirmPassword: {
           sameAsPassword: sameAs(this.form.password)
         }
       }
     }
   },
-  created() { },
-  mounted() { },
-  unmounted() { },
+  created() {},
+  mounted() {},
+  unmounted() {},
   methods: {
     async submitForm() {
       if (!(await this.v$.$validate())) {

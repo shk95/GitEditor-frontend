@@ -1,6 +1,5 @@
 <template>
   <div class="container text-center">
-
     <!-- Breadcrumb 경로 표시 -->
     <div class="row">
       <div class="col-3"></div>
@@ -23,9 +22,7 @@
         </ul>
       </div>
       <div role="separator" class="col-1">
-        <div class="vertical-line">
-
-        </div>
+        <div class="vertical-line"></div>
       </div>
       <div class="col-9">
         <div>
@@ -39,7 +36,6 @@
 
             <!-- lists -->
             <div class="file-list-body">
-
               <!-- list -->
               <div class="file row">
                 <div class="file-name col-4">
@@ -56,14 +52,11 @@
                 <div class="file-size col-3">50 KB</div>
                 <div class="file-updated col-3">2022-04-01 11:00 AM</div>
               </div>
-
             </div>
-
           </div>
         </div>
       </div>
     </div>
-
   </div>
   <IconFile />
   <IconFolder />
@@ -73,7 +66,6 @@
 </template>
 
 <script>
-
 import TreeItem from '../components/TreeItem.vue'
 
 // mock data
@@ -106,14 +98,12 @@ export default {
   data() {
     return {
       treeData
-    };
+    }
   },
-  setup() {
-
-  },
-  created() { },
-  mounted() { },
-  unmounted() { },
+  setup() {},
+  created() {},
+  mounted() {},
+  unmounted() {},
   methods: {}
 }
 </script>
@@ -132,7 +122,7 @@ export default {
   border-bottom: 1px solid #ddd;
 }
 
-.file-list-header>div {
+.file-list-header > div {
   /* flex-basis: 33.33%; */
 }
 

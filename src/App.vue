@@ -1,55 +1,68 @@
+<script setup>
+import { RouterView, RouterLink } from 'vue-router'
+import { useUserStore } from '@/stores/user.store'
+// import { storeToRefs } from 'pinia'
+
+const userStore = useUserStore()
+
+// const user = storeToRefs(userStore)
+</script>
 
 <template>
-  <div>
-    <RouterLink to="/">home</RouterLink>
-    <RouterLink to="/login">login</RouterLink>
-  </div>
-  <RouterView />
-  <div>
-    <Modal modal-id="userConfig" modal-title="사용자 설정">
-      <UserConfig></UserConfig>
-    </Modal>
-    <Modal_btn modal-id="userConfig">
-      사용자 설정
-    </Modal_btn>
+  <div class="app-container bg-light">
+    <nav class="navbar navbar-expand navbar-dark bg-dark px-3">
+      <div v-if="userStore.getToken" class="navbar-nav">
+        <RouterLink class="nav-item nav-link" to="/">Home</RouterLink>
+        <RouterLink class="nav-item nav-link" to="/:authStore.user/list">List</RouterLink>
+        <button class="btn btn-link nav-item nav-link" @click="userStore.logout()">Logout</button>
+        <Modal_1_btn modal-id="userConfig">User Config</Modal_1_btn>
+      </div>
+      <div v-else class="navbar-nav">
+        <RouterLink class="nav-item nav-link" to="/">Home</RouterLink>
+        <RouterLink class="nav-item nav-link" to="/login">Login</RouterLink>
+        <RouterLink class="nav-item nav-link" to="/signup">Signup</RouterLink>
+      </div>
+    </nav>
+    <div>
+      <Modal_1 modal-id="userConfig" modal-title="User Config">
+        <UserConfig></UserConfig>
+      </Modal_1>
+    </div>
+    <div class="container pt-4 pb-4">
+      <RouterView />
+    </div>
   </div>
 </template>
 
-<script setup>
-import { RouterView, RouterLink } from 'vue-router'
-import "bootstrap/dist/css/bootstrap.min.css";
-
-</script>
-
 <script>
-import UserConfig from './modals/UserConfig.vue';
-import Modal from './components/Modal-1.vue';
-import Modal_btn from './components/Modal-1-btn.vue';
-
+import { Modal_1, Modal_1_btn } from '@/components'
+import { UserConfig } from '@/modals'
 
 export default {
-  name: 'MainView',
-  components: { UserConfig, Modal, Modal_btn },
+  components: { UserConfig, Modal_1, Modal_1_btn },
   data() {
-    return {
-      something: ''
-    };
+    return {}
   },
-  setup() { },
-  created() { },
-  mounted() { },
-  unmounted() { },
+  setup() {},
+  created() {},
+  mounted() {},
+  unmounted() {},
   methods: {}
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.app-container {
+  min-height: 350px;
+}
+</style>
+
 <style lang="scss">
 html,
 body {
   height: 100%;
   font-size: 14px;
-  font-family: "Helvetica Neue", Arial, Helvetica, sans-serif !important;
+  font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif !important;
 }
 
 #app,
@@ -69,7 +82,7 @@ body {
 
 input.form-control:focus,
 textarea.form-control:focus {
-  border: 1px solid #377EF6 !important;
+  border: 1px solid #377ef6 !important;
 }
 
 .btn-cancel {
@@ -113,14 +126,14 @@ textarea.form-control:focus {
 
     .modal-header {
       border-bottom: none;
-      padding: 1rem 1rem .5rem;
+      padding: 1rem 1rem 0.5rem;
 
       .modal-title {
         font-size: 1rem;
       }
 
       .close {
-        outline: none !important
+        outline: none !important;
       }
     }
 
@@ -147,6 +160,6 @@ textarea.form-control:focus {
 }
 
 .modal-open .modal-backdrop.show {
-  opacity: .7;
+  opacity: 0.7;
 }
 </style>
