@@ -1,4 +1,6 @@
 <script setup>
+import { UserFindPwd } from '@/modals'
+import { Modal_1, Modal_1_btn } from '@/components'
 import { Form, Field } from 'vee-validate'
 import * as Yup from 'yup'
 import { router } from '@/router'
@@ -20,34 +22,21 @@ const schema = Yup.object().shape({
 
 async function onSubmit(values, { setErrors }) {
   const { userId, password } = values
-  const result = await useUserStore().login({ userId, password })
-  if (result) {
+  const error = await useUserStore()
+    .login({ userId, password })
+    .then(() => {
+      console.log(router, route)
+      router.push(route.query.returnUrl || '/')
+    })
+    .catch((error) => error)
+  if (error) {
     // true : 로그인 실패, false : 로그인 성패
-    console.log(result)
-    if (result.message) {
-      setErrors({ apiError: result.message })
+    console.log(error)
+    alert(error.message)
+    if (error) {
+      setErrors({ apiError: error })
     }
   }
-  console.log(router, route)
-  await router.push(route.query.returnUrl || '/')
-}
-</script>
-
-<script>
-import { UserFindPwd } from '@/modals'
-import { Modal_1, Modal_1_btn } from '@/components'
-
-export default {
-  name: 'LoginView',
-  components: { UserFindPwd, Modal_1, Modal_1_btn },
-  data() {
-    return {}
-  },
-  setup() {},
-  created() {},
-  mounted() {},
-  unmounted() {},
-  methods: {}
 }
 </script>
 

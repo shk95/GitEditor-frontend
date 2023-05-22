@@ -6,7 +6,7 @@ import { useUserStore } from '@/stores/user.store'
 import axios from 'axios'
 
 const instance = axios.create({
-  baseURL: 'http://localhost:10000',
+  baseURL: `${import.meta.env.VITE_SERVER_API_URL}`,
   timeout: 10000
 })
 
