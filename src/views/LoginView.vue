@@ -6,6 +6,7 @@ import * as Yup from 'yup'
 import { router } from '@/router'
 import { useUserStore } from '@/stores/user.store'
 import { useRoute } from 'vue-router'
+import socials from '@/services/socials'
 
 const route = useRoute()
 const userStore = useUserStore() // TODO 전역으로 사용자 정보 감시
@@ -85,8 +86,28 @@ async function onSubmit(values, { setErrors }) {
       <UserFindPwd></UserFindPwd>
     </Modal_1>
   </div>
-  <a
-    href="http://localhost:10000/oauth2/authorization/github?redirect_uri=http://localhost:4000/oauth/redirect"
-    >깃허브</a
-  >
+  <div>
+    <div>
+      <div
+        v-for="social in socials.socials"
+        v-bind:key="social.socialType"
+        class="social_login_container"
+      >
+        <a v-bind:href="socials.getSocialLoginUrl(social.socialType)">
+          <img
+            class="social_login"
+            v-bind:src="socials.getSocialImage(social.socialType)"
+            v-bind:style="{ width: social.width, height: social.height }"
+          />
+          {{ social.comment }}
+        </a>
+      </div>
+    </div>
+  </div>
 </template>
+
+<style scoped>
+.social_login_container {
+  text-align: center;
+}
+</style>
