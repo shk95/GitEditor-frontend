@@ -74,13 +74,13 @@ export const useUserStore = defineStore('user', {
       this.refreshTokenTimeout = null
     },
     login(data) {
-      $axios.post('/auth/login', data).then(
+      return $axios.post('/auth/login', data).then(
         ({ data, message }) => {
           console.debug('login data : ', data)
           alert(message)
           this.accessToken = data?.accessToken
           if (!this.accessToken) {
-            new Error('로그인 실패')
+            throw new Error('로그인 실패. 서버 에러.')
           }
           console.log(this.accessToken)
           this.me()
@@ -88,6 +88,7 @@ export const useUserStore = defineStore('user', {
         },
         (reject) => {
           console.debug('login error in user store', reject)
+          throw new Error('로그인 실패')
         }
       )
     },

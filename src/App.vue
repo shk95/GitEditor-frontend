@@ -1,11 +1,10 @@
 <script setup>
 import { RouterView, RouterLink } from 'vue-router'
 import { useUserStore } from '@/stores/user.store'
-// import { storeToRefs } from 'pinia'
+import { Modal_1, Modal_1_btn } from '@/components'
+import { UserConfig } from '@/modals'
 
 const userStore = useUserStore()
-
-// const user = storeToRefs(userStore)
 </script>
 
 <template>
@@ -33,23 +32,6 @@ const userStore = useUserStore()
     </div>
   </div>
 </template>
-
-<script>
-import { Modal_1, Modal_1_btn } from '@/components'
-import { UserConfig } from '@/modals'
-
-export default {
-  components: { UserConfig, Modal_1, Modal_1_btn },
-  data() {
-    return {}
-  },
-  setup() {},
-  created() {},
-  mounted() {},
-  unmounted() {},
-  methods: {}
-}
-</script>
 
 <style scoped>
 .app-container {
