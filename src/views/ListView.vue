@@ -1,3 +1,30 @@
+<script setup>
+import TreeItem from '../components/TreeItem.vue'
+
+// mock data
+const treeData = {
+  name: 'My Tree',
+  children: [
+    { name: 'hello' },
+    { name: 'wat' },
+    {
+      name: 'child folder',
+      children: [
+        {
+          name: 'child folder',
+          children: [{ name: 'hello' }, { name: 'wat' }]
+        },
+        { name: 'hello' },
+        { name: 'wat' },
+        {
+          name: 'child folder',
+          children: [{ name: 'hello' }, { name: 'wat' }]
+        }
+      ]
+    }
+  ]
+}
+</script>
 <template>
   <div class="container text-center">
     <!-- Breadcrumb 경로 표시 -->
@@ -8,7 +35,7 @@
           <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="#">Home</a></li>
             <li class="breadcrumb-item"><a href="#">Library</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Data</li>
+            <li aria-current="page" class="breadcrumb-item active">Data</li>
           </ol>
         </nav>
       </div>
@@ -18,10 +45,10 @@
     <div class="row">
       <div class="col-2">
         <ul class="container">
-          <TreeItem class="item" :model="treeData"></TreeItem>
+          <TreeItem :model="treeData" class="item"></TreeItem>
         </ul>
       </div>
-      <div role="separator" class="col-1">
+      <div class="col-1" role="separator">
         <div class="vertical-line"></div>
       </div>
       <div class="col-9">
@@ -64,49 +91,6 @@
   <IconTree />
   <IconTreeToggleOn />
 </template>
-
-<script>
-import TreeItem from '../components/TreeItem.vue'
-
-// mock data
-const treeData = {
-  name: 'My Tree',
-  children: [
-    { name: 'hello' },
-    { name: 'wat' },
-    {
-      name: 'child folder',
-      children: [
-        {
-          name: 'child folder',
-          children: [{ name: 'hello' }, { name: 'wat' }]
-        },
-        { name: 'hello' },
-        { name: 'wat' },
-        {
-          name: 'child folder',
-          children: [{ name: 'hello' }, { name: 'wat' }]
-        }
-      ]
-    }
-  ]
-}
-
-export default {
-  name: 'listView',
-  components: { TreeItem },
-  data() {
-    return {
-      treeData
-    }
-  },
-  setup() {},
-  created() {},
-  mounted() {},
-  unmounted() {},
-  methods: {}
-}
-</script>
 
 <style>
 .file-list {

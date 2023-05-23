@@ -1,9 +1,12 @@
 <script setup>
+import { UserFindPwd } from '@/modals'
+import { Modal_1, Modal_1_btn } from '@/components'
 import { Form, Field } from 'vee-validate'
 import * as Yup from 'yup'
 import { router } from '@/router'
 import { useUserStore } from '@/stores/user.store'
 import { useRoute } from 'vue-router'
+import socials from '@/services/socials'
 
 const route = useRoute()
 const userStore = useUserStore() // TODO 전역으로 사용자 정보 감시
@@ -20,34 +23,21 @@ const schema = Yup.object().shape({
 
 async function onSubmit(values, { setErrors }) {
   const { userId, password } = values
-  const result = await useUserStore().login({ userId, password })
-  if (result) {
+  const error = await useUserStore()
+    .login({ userId, password })
+    .then(() => {
+      console.log(router, route)
+      router.push(route.query.returnUrl || '/')
+    })
+    .catch((error) => error)
+  if (error) {
     // true : 로그인 실패, false : 로그인 성패
-    console.log(result)
-    if (result.message) {
-      setErrors({ apiError: result.message })
+    console.log(error)
+    alert(error.message)
+    if (error) {
+      setErrors({ apiError: error })
     }
   }
-  console.log(router, route)
-  await router.push(route.query.returnUrl || '/')
-}
-</script>
-
-<script>
-import { UserFindPwd } from '@/modals'
-import { Modal_1, Modal_1_btn } from '@/components'
-
-export default {
-  name: 'LoginView',
-  components: { UserFindPwd, Modal_1, Modal_1_btn },
-  data() {
-    return {}
-  },
-  setup() {},
-  created() {},
-  mounted() {},
-  unmounted() {},
-  methods: {}
 }
 </script>
 
@@ -96,8 +86,28 @@ export default {
       <UserFindPwd></UserFindPwd>
     </Modal_1>
   </div>
-  <a
-    href="http://localhost:10000/oauth2/authorization/github?redirect_uri=http://localhost:4000/oauth/redirect"
-    >깃허브</a
-  >
+  <div>
+    <div>
+      <div
+        v-for="social in socials.socials"
+        v-bind:key="social.socialType"
+        class="social_login_container"
+      >
+        <a v-bind:href="socials.getSocialLoginUrl(social.socialType)">
+          <img
+            class="social_login"
+            v-bind:src="socials.getSocialImage(social.socialType)"
+            v-bind:style="{ width: social.width, height: social.height }"
+          />
+          {{ social.comment }}
+        </a>
+      </div>
+    </div>
+  </div>
 </template>
+
+<style scoped>
+.social_login_container {
+  text-align: center;
+}
+</style>
