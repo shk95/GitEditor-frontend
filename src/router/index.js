@@ -1,6 +1,8 @@
-import { route } from 'quasar/wrappers'
-import { createRouter, createMemoryHistory, createWebHistory, createWebHashHistory } from 'vue-router'
+import {route} from 'quasar/wrappers'
+import {createMemoryHistory, createRouter, createWebHashHistory, createWebHistory} from 'vue-router'
 import routes from './routes'
+import {storeToRefs} from "pinia";
+import {useUserStore} from "stores/user";
 
 /*
  * If not building with SSR mode, you can
@@ -11,19 +13,33 @@ import routes from './routes'
  * with the Router instance.
  */
 
-export default route(function (/* { store, ssrContext } */) {
+export default route(function ({store, ssrContext}) {
   const createHistory = process.env.SERVER
     ? createMemoryHistory
     : (process.env.VUE_ROUTER_MODE === 'history' ? createWebHistory : createWebHashHistory)
 
   const Router = createRouter({
-    scrollBehavior: () => ({ left: 0, top: 0 }),
+    scrollBehavior: () => ({left: 0, top: 0}),
     routes,
 
     // Leave this as is and make changes in quasar.conf.js instead!
     // quasar.conf.js -> build -> vueRouterMode
     // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE)
+  })
+
+  Router.beforeEach(async (to) => {
+    // redirect to login page if not logged in and trying to access a restricted page
+    const publicPages = ['/login', '/signup', '/findPwd', '/oauth/redirect', '/signup/oauth']
+    const authRequired = !publicPages.includes(to.path) // 해당 요청 페이지가 publicPages에 없으면 true => 로그인이 필요한 페이지
+    const authStore = useUserStore()
+    const user = storeToRefs(authStore) // TODO :user getter
+    if (authRequired && !user.getToken) {
+      return {
+        path: '/login',
+        query: {returnUrl: to.href}
+      }
+    }
   })
 
   return Router
