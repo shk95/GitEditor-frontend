@@ -25,6 +25,15 @@ export const useUserStore = defineStore('user', {
     },
     getUserName(state) {
       return state.defaultUsername
+    },
+    getUserImg(state) {
+      return state.defaultImgUrl
+    },
+    isUserLogin(state) {
+      return state.userId != null
+    },
+    getUserDefaultEmail(state) {
+      return state.defaultEmail
     }
   },
   persist: true,
@@ -39,14 +48,14 @@ export const useUserStore = defineStore('user', {
           (response) => {
             console.debug('/user/me response : ', response)
             console.log(response?.message, response.data)
-            this.saveUser(response.data)
+            this.saveUser(response.data).then(() => console.log("User saved."))
           },
           () => {
           }
         )
         .catch()
     },
-    saveUser(data) {
+    async saveUser(data) {
       this.userId = data.userId
       this.role = data.role
       this.providerType = data.providerType
@@ -112,13 +121,18 @@ export const useUserStore = defineStore('user', {
     async refreshToken() {
       api
         .post('/auth/reissue', this.accessToken)
-        .then(({data}) => {
-          this.saveUser(data)
+        .then((data) => {
+          const renewedToken = data.data?.accessToken
+          if (!renewedToken) {
+            throw new Error("Failed to refresh token")
+          }
+          this.accessToken = renewedToken
           this.startRefreshTokenTimer()
-          console.debug('Token refreshed. result : ', data.result)
+          console.info('Token refreshed. result : ', data?.result)
         })
         .catch((error) => {
           console.debug('refreshToken error : ', error)
+          alert('로그인 세션 만료 또는 서버 오류입니다.')
           this.invalidateUser()
         })
     },
@@ -132,7 +146,7 @@ export const useUserStore = defineStore('user', {
       // set a timeout to refresh the token a minute before it expires
       const timeout = expires.getTime() - Date.now() - 60 * 1000
       console.debug('Start refresh token timer. expires : ', expires, '\ntimeout :', timeout)
-      this.refreshTokenTimeout = setTimeout(this.refreshToken, timeout)
+      this.refreshTokenTimeout = setTimeout(() => this.refreshToken(), timeout)
     },
     stopRefreshTokenTimer() {
       clearTimeout(this.refreshTokenTimeout)
