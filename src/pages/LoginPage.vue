@@ -1,43 +1,40 @@
 <script setup>
-import { UserFindPwd } from '../modals'
-import { Modal_1, Modal_1_btn } from '../components'
-import { Form, Field } from 'vee-validate'
-import * as Yup from 'yup'
-import { useUserStore } from 'stores/user'
-import socials from '../utils/socials'
-import { useRouter, useRoute } from 'vue-router'
+import { Form, Field } from "vee-validate";
+import * as Yup from "yup";
+import { useUserStore } from "stores/user";
+import socials from "../utils/socials";
+import { useRouter, useRoute } from "vue-router";
 
+const userStore = useUserStore(); // TODO 전역으로 사용자 정보 감시
 
-const userStore = useUserStore() // TODO 전역으로 사용자 정보 감시
-
-const router = useRouter()
-const route = useRoute()
+const router = useRouter();
+const route = useRoute();
 
 // redirect to home if already logged in
 if (userStore.getUserId) {
-  router.push('/')
+  router.push("/");
 }
 
 const schema = Yup.object().shape({
-  userId: Yup.string().required('User id is required'),
-  password: Yup.string().required('Password is required')
-})
+  userId: Yup.string().required("User id is required"),
+  password: Yup.string().required("Password is required"),
+});
 
 async function onSubmit(values, { setErrors }) {
-  const { userId, password } = values
+  const { userId, password } = values;
   const error = await useUserStore()
     .login({ userId, password })
     .then(() => {
-      console.log(router, route)
-      router.push(route.query.returnUrl || '/')
+      console.log(router, route);
+      router.push(route.query.returnUrl || "/");
     })
-    .catch((error) => error)
+    .catch((error) => error);
   if (error) {
     // true : 로그인 실패, false : 로그인 성패
-    console.log(error)
-    alert(error.message)
+    console.log(error);
+    alert(error.message);
     if (error) {
-      setErrors({ apiError: error })
+      setErrors({ apiError: error });
     }
   }
 }
@@ -46,7 +43,11 @@ async function onSubmit(values, { setErrors }) {
 <template>
   <div class="col-md-6 offset-md-3 mt-5">
     <h2>Login</h2>
-    <Form v-slot="{ errors, isSubmitting }" :validation-schema="schema" @submit="onSubmit">
+    <Form
+      v-slot="{ errors, isSubmitting }"
+      :validation-schema="schema"
+      @submit="onSubmit"
+    >
       <div class="mb-3">
         <label class="form-label">User Id</label>
         <Field
@@ -69,11 +70,16 @@ async function onSubmit(values, { setErrors }) {
       </div>
       <div class="mb-3">
         <button :disabled="isSubmitting" class="btn btn-primary">
-          <span v-show="isSubmitting" class="spinner-border spinner-border-sm me-1"></span>
+          <span
+            v-show="isSubmitting"
+            class="spinner-border spinner-border-sm me-1"
+          ></span>
           Login
         </button>
       </div>
-      <div v-if="errors.apiError" class="alert alert-danger mt-3 mb-0">{{ errors.apiError }}</div>
+      <div v-if="errors.apiError" class="alert alert-danger mt-3 mb-0">
+        {{ errors.apiError }}
+      </div>
     </Form>
     <div class="links">
       <p class="sign-up text-muted">
@@ -81,12 +87,9 @@ async function onSubmit(values, { setErrors }) {
         <router-link class="link-sign-up" to="signup">Sign-up</router-link>
       </p>
       <p>
-        <Modal_1_btn modal-id="userFindPwd">Find Password</Modal_1_btn>
+        <router-link to="findPwd">Find Password</router-link>
       </p>
     </div>
-    <Modal_1 modal-id="userFindPwd" modal-title="Find Password">
-      <UserFindPwd></UserFindPwd>
-    </Modal_1>
   </div>
   <div>
     <div>

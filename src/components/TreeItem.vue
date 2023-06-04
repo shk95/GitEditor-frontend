@@ -21,45 +21,50 @@
   </li>
   <ul v-show="isOpen" v-if="isFolder">
     <!-- A component can recursively render itself using its "name" option (inferred from filename if using SFC) -->
-    <TreeItem class="item" v-for="model in model.children" :model="model" :key="model.name" />
+    <TreeItem
+      class="item"
+      v-for="model in model.children"
+      :model="model"
+      :key="model.name"
+    />
   </ul>
 </template>
 
 <script>
-import IconFile from '../components/icons/IconFile.vue'
-import IconFolder from '../components/icons/IconFolder.vue'
-import IconFolderOpened from '../components/icons/IconFolderOpened.vue'
-import IconTree from '../components/icons/IconTree.vue'
-import IconTreeToggleOn from '../components/icons/IconTreeToggleOn.vue'
+import IconFile from "../components/icons/IconFile.vue";
+import IconFolder from "../components/icons/IconFolder.vue";
+import IconFolderOpened from "../components/icons/IconFolderOpened.vue";
+import IconTree from "../components/icons/IconTree.vue";
+import IconTreeToggleOn from "../components/icons/IconTreeToggleOn.vue";
 
 export default {
-  name: 'TreeItem', // necessary for self-reference
+  name: "TreeItem", // necessary for self-reference
   props: {
-    model: Object
+    model: Object,
   },
   components: {
     IconFile,
     IconFolder,
     IconFolderOpened,
     IconTree,
-    IconTreeToggleOn
+    IconTreeToggleOn,
   },
   data() {
     return {
-      isOpen: false
-    }
+      isOpen: false,
+    };
   },
   computed: {
     isFolder() {
-      return this.model.children && this.model.children.length
-    }
+      return this.model.children && this.model.children.length;
+    },
   },
   methods: {
     toggle() {
       if (this.isFolder) {
-        this.isOpen = !this.isOpen
+        this.isOpen = !this.isOpen;
       }
-    }
-  }
-}
+    },
+  },
+};
 </script>

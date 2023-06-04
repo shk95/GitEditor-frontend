@@ -3,7 +3,9 @@
     <div class="row justify-content-center">
       <div class="form">
         <form @submit.prevent="submitForm">
-          <div v-show="errorMessage" class="alert alert-danger failed">{{ errorMessage }}</div>
+          <div v-show="errorMessage" class="alert alert-danger failed">
+            {{ errorMessage }}
+          </div>
           <div class="form-group">
             <label for="username">아이디</label>
             <input
@@ -62,11 +64,21 @@
           </div>
           <div class="form-group">
             <label for="chatGPT">chatGPT token</label>
-            <input type="password" class="form-control" id="chatGPT" v-model="form.chatGPT" />
+            <input
+              type="password"
+              class="form-control"
+              id="chatGPT"
+              v-model="form.chatGPT"
+            />
           </div>
           <div class="form-group">
             <label for="gitToken">GitHub token</label>
-            <input type="password" class="form-control" id="gitToken" v-model="form.gitToken" />
+            <input
+              type="password"
+              class="form-control"
+              id="gitToken"
+              v-model="form.gitToken"
+            />
           </div>
           <div>
             <div class="form-check form-switch">
@@ -76,7 +88,9 @@
                 role="switch"
                 id="flexSwitchCheckDefault-github"
               />
-              <label class="form-check-label" for="flexSwitchCheckDefault-github"
+              <label
+                class="form-check-label"
+                for="flexSwitchCheckDefault-github"
                 >Using Github</label
               >
             </div>
@@ -95,55 +109,59 @@
             </div>
           </div>
           <button type="submit" class="btn btn-primary btn-block">변경</button>
-          <button type="button" class="btn btn-primary btn-block">돌아가기</button>
+          <button type="button" class="btn btn-primary btn-block">
+            돌아가기
+          </button>
         </form>
       </div>
     </div>
   </div>
+  <user-change-email></user-change-email>
 </template>
 
 <script>
-import { useVuelidate } from '@vuelidate/core'
-import { required, sameAs } from '@vuelidate/validators'
+import { useVuelidate } from "@vuelidate/core";
+import { required, sameAs } from "@vuelidate/validators";
+import UserChangeEmail from "pages/user/config/UserChangeEmail.vue";
 
 export default {
-  name: 'UserConfig',
-  components: {},
+  name: "UserConfig",
+  components: { UserChangeEmail },
   data() {
     return {
       form: {
-        username: '',
-        emailAddress: '',
-        password: '',
-        confirmPassword: '',
-        useGithub: '' /* boolen */,
-        gitToken: '',
-        useGpt: '' /* boolen */,
-        gptToken: ''
+        username: "",
+        emailAddress: "",
+        password: "",
+        confirmPassword: "",
+        useGithub: "" /* boolen */,
+        gitToken: "",
+        useGpt: "" /* boolen */,
+        gptToken: "",
       },
-      errorMessage: ''
-    }
+      errorMessage: "",
+    };
   },
   setup() {
     return {
-      v$: useVuelidate()
-    }
+      v$: useVuelidate(),
+    };
   },
   validations() {
     return {
       form: {
         username: {
-          required
+          required,
         },
         emailAddress: {
-          required
+          required,
         },
         password: {},
         confirmPassword: {
-          sameAsPassword: sameAs(this.form.password)
-        }
-      }
-    }
+          sameAsPassword: sameAs(this.form.password),
+        },
+      },
+    };
   },
   created() {},
   mounted() {},
@@ -151,9 +169,9 @@ export default {
   methods: {
     async submitForm() {
       if (!(await this.v$.$validate())) {
-        this.errorMessage = ''
-        alert('내용을 입력해주세요.')
-        return
+        this.errorMessage = "";
+        alert("내용을 입력해주세요.");
+        return;
       }
       /* this.$axios
           .put('/notice/' + this.form.noticeSeq, this.form)
@@ -166,9 +184,9 @@ export default {
               alert('에러발생.')
               console.log(error)
           }) */
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
 <style></style>

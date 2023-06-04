@@ -13,18 +13,18 @@
 
 <script>
 export default {
-  name: 'Modal-1-btn',
+  name: "Modal-1-btn",
   components: {},
   data() {
-    return {}
+    return {};
   },
   props: {
-    modalId: String
+    modalId: String,
   },
   setup() {},
   created() {},
   mounted() {},
   unmounted() {},
-  methods: {}
-}
+  methods: {},
+};
 </script>
