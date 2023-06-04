@@ -1,29 +1,29 @@
 <script setup>
-import TreeItem from '../components/TreeItem.vue'
+import TreeItem from "../components/TreeItem.vue";
 
 // mock data
 const treeData = {
-  name: 'My Tree',
+  name: "My Tree",
   children: [
-    { name: 'hello' },
-    { name: 'wat' },
+    { name: "hello" },
+    { name: "wat" },
     {
-      name: 'child folder',
+      name: "child folder",
       children: [
         {
-          name: 'child folder',
-          children: [{ name: 'hello' }, { name: 'wat' }]
+          name: "child folder",
+          children: [{ name: "hello" }, { name: "wat" }],
         },
-        { name: 'hello' },
-        { name: 'wat' },
+        { name: "hello" },
+        { name: "wat" },
         {
-          name: 'child folder',
-          children: [{ name: 'hello' }, { name: 'wat' }]
-        }
-      ]
-    }
-  ]
-}
+          name: "child folder",
+          children: [{ name: "hello" }, { name: "wat" }],
+        },
+      ],
+    },
+  ],
+};
 </script>
 <template>
   <div class="container text-center">

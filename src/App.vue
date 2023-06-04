@@ -1,159 +1,128 @@
 <script setup>
-import {RouterView, RouterLink} from 'vue-router'
-import {useUserStore} from 'stores/user'
-import {Modal_1, Modal_1_btn} from './components'
-import {UserConfig} from './modals'
+import { RouterView } from "vue-router";
+import { useUserStore } from "stores/user";
+import { ref } from "vue";
+import { Dark } from "quasar";
+import { useCurrentStore } from "stores/current";
+import { useRouter } from "vue-router";
 
-const userStore = useUserStore()
+const leftDrawerOpen = ref(false);
+const userStore = useUserStore();
+const currentStore = useCurrentStore();
+const router = useRouter();
+
+userStore.refreshToken();
+
+console.log("Is user logged in?", userStore.isUserLogin);
+
+const userPrfImgSrc = () => {
+  return (
+    userStore.getUserImg ||
+    "https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg"
+  );
+};
+const toggleLeftDrawer = () => {
+  leftDrawerOpen.value = !leftDrawerOpen.value;
+};
+
+const logout = () => {
+  console.log("33333333333");
+  userStore.logout().then(() => router.push("/"));
+};
 </script>
 
 <template>
-  <!--  <router-view />-->
+  <q-layout view="hHh lpR fFf">
+    <q-header elevated class="bg-primary text-white" height-hint="98">
+      <q-toolbar>
+        <q-btn
+          v-if="userStore.isUserLogin"
+          dense
+          flat
+          round
+          icon="menu"
+          @click="toggleLeftDrawer"
+        />
+        <q-btn dense flat round @click="Dark.toggle()" icon="dark_mode" />
 
-  <div class="app-container bg-light">
-    <nav class="navbar navbar-expand navbar-dark bg-dark px-3">
-      <div v-if="userStore.getToken" class="navbar-nav">
-        <RouterLink class="nav-item nav-link" to="/">Home</RouterLink>
-        <RouterLink class="nav-item nav-link" to="/:authStore.user/list">List</RouterLink>
-        <button class="btn btn-link nav-item nav-link" @click="userStore.logout()">Logout</button>
-        <Modal_1_btn modal-id="userConfig">User Config</Modal_1_btn>
+        <q-toolbar-title>
+          <!--          <q-avatar square>
+                      <img v-bind:src="userPrfImgSrc()" width="20px" height="20px"
+                           style="!important;padding-left: 0; padding-right: 0">
+                    </q-avatar>-->
+          Hello
+        </q-toolbar-title>
+      </q-toolbar>
+
+      <div v-if="!userStore.isUserLogin">
+        <q-tabs align="justify" dense>
+          <q-route-tab to="/" label="Home" />
+          <q-route-tab to="/login" label="Login" />
+          <q-route-tab to="/signup" label="Sign Up" />
+        </q-tabs>
       </div>
-      <div v-else class="navbar-nav">
-        <RouterLink class="nav-item nav-link" to="/">Home</RouterLink>
-        <RouterLink class="nav-item nav-link" to="/login">Login</RouterLink>
-        <RouterLink class="nav-item nav-link" to="/signup">Signup</RouterLink>
+      <div v-else>
+        <q-tabs align="justify" dense>
+          <q-route-tab to="/" label="Home" />
+          <q-route-tab @click="logout" label="Logout" />
+        </q-tabs>
       </div>
-    </nav>
-    <div>
-      <Modal_1 modal-id="userConfig" modal-title="User Config">
-        <UserConfig></UserConfig>
-      </Modal_1>
-    </div>
-    <div class="container pt-4 pb-4">
-      <RouterView/>
-    </div>
-  </div>
+    </q-header>
+
+    <q-drawer
+      v-if="userStore.isUserLogin"
+      v-model="leftDrawerOpen"
+      side="left"
+      bordered
+      :width="300"
+      :breakpoint="400"
+    >
+      <q-scroll-area
+        style="
+          height: calc(100% - 150px);
+          margin-top: 150px;
+          border-right: 1px solid #ddd;
+        "
+      >
+        <q-list padding>
+          <q-item
+            clickable
+            v-ripple
+            v-for="item in currentStore.getDrawerItems"
+            :key="item.section"
+            :to="item.router"
+          >
+            <q-item-section avatar>
+              <q-icon :name="item.iconName" />
+            </q-item-section>
+
+            <q-item-section>
+              {{ item.section }}
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-scroll-area>
+
+      <q-img
+        class="absolute-top"
+        src="https://cdn.quasar.dev/img/material.png"
+        style="height: 150px"
+      >
+        <div class="absolute-bottom bg-transparent">
+          <q-avatar size="56px" class="q-mb-sm">
+            <img
+              :src="userPrfImgSrc()"
+              style="padding-left: 0; padding-right: 0"
+            />
+          </q-avatar>
+          <div class="text-weight-bold" v-text="userStore.getUserName"></div>
+          <div v-text="userStore.getUserDefaultEmail"></div>
+        </div>
+      </q-img>
+    </q-drawer>
+
+    <q-page-container>
+      <router-view />
+    </q-page-container>
+  </q-layout>
 </template>
-
-<script>
-import 'bootstrap'
-
-import {defineComponent} from 'vue'
-
-export default defineComponent({
-  name: 'App'
-})
-</script>
-
-<style scoped>
-.app-container {
-  min-height: 350px;
-}
-</style>
-
-<style lang="scss">
-html,
-body {
-  height: 100%;
-  font-size: 14px;
-  font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif !important;
-}
-
-#app,
-.page {
-  height: 100%;
-  position: relative;
-}
-
-.page {
-  display: flex;
-  flex-direction: column;
-}
-
-.public.container {
-  max-width: 900px;
-}
-
-input.form-control:focus,
-textarea.form-control:focus {
-  border: 1px solid #377ef6 !important;
-}
-
-.btn-cancel {
-  color: #666 !important;
-}
-
-.public {
-  .form {
-    margin-top: 50px;
-    width: 320px;
-
-    .form-group {
-      label {
-        font-weight: bold;
-        color: #555;
-      }
-
-      .error {
-        line-height: 1;
-        // display: none;
-        margin-top: 5px;
-      }
-    }
-  }
-}
-
-.field-error {
-  .error {
-    display: block;
-    color: #ff0000;
-  }
-}
-
-.modal {
-  .modal-dialog {
-    -webkit-transform: translate(0, -25%);
-    -o-transform: translate(0, -25%);
-    transform: translate(0, -25%);
-    top: 25%;
-    margin: 0 auto;
-
-    .modal-header {
-      border-bottom: none;
-      padding: 1rem 1rem 0.5rem;
-
-      .modal-title {
-        font-size: 1rem;
-      }
-
-      .close {
-        outline: none !important;
-      }
-    }
-
-    .modal-body {
-      padding-bottom: 0;
-
-      textarea {
-        resize: none;
-        height: 100px;
-      }
-    }
-
-    .modal-footer {
-      justify-content: start;
-      border-top: none;
-      padding-top: 0;
-      padding-bottom: 1.5rem;
-
-      .btn-cancel {
-        color: #666;
-      }
-    }
-  }
-}
-
-.modal-open .modal-backdrop.show {
-  opacity: 0.7;
-}
-</style>

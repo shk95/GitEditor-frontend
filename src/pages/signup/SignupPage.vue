@@ -3,7 +3,9 @@
     <div class="row justify-content-center">
       <div class="form">
         <form @submit.prevent="submitForm">
-          <div v-show="errorMessage" class="alert alert-danger failed">{{ errorMessage }}</div>
+          <div v-show="errorMessage" class="alert alert-danger failed">
+            {{ errorMessage }}
+          </div>
           <div class="form-group">
             <label for="userId">아이디</label>
             <input
@@ -94,7 +96,9 @@
               ></p>
             </div>
           </div>
-          <button class="btn btn-primary btn-block" type="submit">회원가입</button>
+          <button class="btn btn-primary btn-block" type="submit">
+            회원가입
+          </button>
           <p class="text-center text-muted">
             <RouterLink to="/login">로그인</RouterLink>
           </p>
@@ -105,58 +109,65 @@
 </template>
 
 <script>
-import { required, maxLength, minLength, email, alphaNum, sameAs } from '@vuelidate/validators'
-import { useVuelidate } from '@vuelidate/core'
-import { RouterLink } from 'vue-router'
-import {api} from "boot/axios";
+import {
+  required,
+  maxLength,
+  minLength,
+  email,
+  alphaNum,
+  sameAs,
+} from "@vuelidate/validators";
+import { useVuelidate } from "@vuelidate/core";
+import { RouterLink } from "vue-router";
+import { api } from "boot/axios";
 
 export default {
-  name: 'SignupPage',
+  name: "SignupPage",
   components: { RouterLink },
   setup() {
     return {
-      v$: useVuelidate()
-    }
+      v$: useVuelidate(),
+    };
   },
   data() {
     return {
       form: {
-        userId: '',
-        username: '',
-        defaultEmail: '',
-        password: '',
-        confirmPassword: ''
+        userId: "",
+        username: "",
+        defaultEmail: "",
+        password: "",
+        confirmPassword: "",
       },
-      errorMessage: ''
-    }
+      errorMessage: "",
+    };
   },
   validations() {
     return {
       form: {
         userId: {
           required,
-          alphaNum
+          alphaNum,
         },
         username: {
           required,
           alphaNum,
           minLength: minLength(1),
-          maxLength: maxLength(20)
+          maxLength: maxLength(20),
         },
         defaultEmail: {
           required,
-          email
+          email,
         },
         password: {
           required,
           minLength: minLength(1),
-          maxLength: maxLength(20)
+          maxLength: maxLength(20),
         },
         confirmPassword: {
-          sameAsPassword: sameAs(this.form.password)
-        }
-      }
-    }
+          sameAsPassword: sameAs(this.form.password),
+        },
+      },
+    };
   },
   created() {},
   mounted() {},
@@ -164,22 +175,27 @@ export default {
   methods: {
     async submitForm() {
       if (!(await this.v$.$validate())) {
-        this.errorMessage = '회원가입 양식을 확인해주세요'
-        alert('내용을 입력해주세요.')
-        return
+        this.errorMessage = "회원가입 양식을 확인해주세요";
+        alert("내용을 입력해주세요.");
+        return;
       }
       api
-        .post('/auth/signup', this.form)
-        .then(({ data }) => {
-          console.debug('signup ok\ndata : ' + data + '\nstatus : ' + data.status)
-          alert('가입되었습니다.')
+        .post("/auth/signup", this.form)
+        .then((data) => {
+          console.debug(
+            "signup ok\nmessage : " +
+              data?.message +
+              "\nstatus : " +
+              data?.status
+          );
+          alert("가입되었습니다.");
           // this.$router.push({ name: 'home' })
         })
         .catch((error) => {
-          alert('에러발생.')
-          console.log(error)
-        })
-    }
-  }
-}
+          alert("에러발생.");
+          console.log(error);
+        });
+    },
+  },
+};
 </script>

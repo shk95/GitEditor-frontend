@@ -1,65 +1,136 @@
 const routes = [
-  /*{
-    path: '/',
-    component: () => import('layouts/MainLayout.vue'),
+  {
+    path: "/",
+    name: "home",
+    component: () => import("pages/HomePage.vue"),
+  },
+  {
+    path: "/login",
+    component: () => import("pages/LoginPage.vue"),
+  },
+  {
+    path: "/signup",
+    component: () => import("layouts/SignupLayout.vue"),
     children: [
-      {path: '', component: () => import('pages/IndexPage.vue')}
-    ]
-  },*/
-  {
-    path: '/',
-    name: 'home',
-    component: ()=>import('layouts/HomeLayout.vue')
+      {
+        path: "",
+        component: () => import("pages/signup/SignupPage.vue"),
+      },
+      {
+        path: "oauth",
+        component: () => import("pages/signup/SignupOAuthPage.vue"),
+      },
+    ],
   },
   {
-    path: '/login',
-    // name: 'longin',
-    component: ()=>import('pages/LoginView.vue')
+    path: "/edit",
+    component: () => import("pages/EditMode.vue"),
   },
   {
-    path: '/oauth/redirect',
-    name: 'oAuthRedirect',
-    component: ()=>import('pages/RedirectView.vue')
+    path: "/user",
+    component: () => import("layouts/UserLayout.vue"),
+    meta: {
+      requiresAuth: true,
+      roles: ["USER"],
+    },
+    children: [
+      {
+        path: "email",
+        component: () => import("pages/user/config/UserChangeEmail.vue"),
+        name: "tempLogin",
+        meta: {
+          requiresAuth: true,
+          roles: ["TEMP"],
+        },
+      },
+      {
+        path: "info",
+        component: () => import("pages/user/UserInfoPage.vue"),
+        meta: {
+          requiresAuth: true,
+          roles: ["USER", "TEMP"],
+        },
+      },
+      {
+        path: "config",
+        component: () => import("pages/user/UserConfigPage.vue"),
+        meta: {
+          requiresAuth: true,
+          roles: ["USER"],
+        },
+      },
+      {
+        path: "repo",
+        component: () => import("layouts/RepoLayout.vue"),
+        meta: {
+          requiresAuth: true,
+          roles: ["USER"],
+        },
+        children: [
+          {
+            path: "",
+            component: () => import("pages/user/repo/RepoListPage.vue"),
+            meta: {
+              requiresAuth: true,
+              roles: ["USER"],
+            },
+          },
+          {
+            path: "edit",
+            component: () => import("pages/user/repo/RepoEditPage.vue"),
+            meta: {
+              requiresAuth: true,
+              roles: ["USER"],
+            },
+          },
+        ],
+      },
+      {
+        path: "stars",
+        component: () => import("layouts/StarsLayout.vue"),
+        meta: {
+          requiresAuth: true,
+          roles: ["USER"],
+        },
+        children: [
+          {
+            path: "",
+            component: () => import("pages/user/stars/StarsListPage.vue"),
+            meta: {
+              requiresAuth: true,
+              roles: ["USER"],
+            },
+          },
+          {
+            path: "search",
+            component: () => import("pages/user/stars/StarsSearchPage.vue"),
+            meta: {
+              requiresAuth: true,
+              roles: ["USER"],
+            },
+          },
+        ],
+      },
+    ],
   },
   {
-    path: '/signup',
-    name: 'signup',
-    component: () => import('pages/Signup.vue')
+    path: "/findPwd",
+    component: () => import("pages/UserFindPwdPage.vue"),
   },
   {
-    path: '/signup/oauth',
-    name: 'oAuthRegister',
-    component: () => import('pages/OauthRegisterView.vue')
+    path: "/oauth/redirect",
+    component: () => import("pages/RedirectPage.vue"),
   },
   {
-    path: '/:user/config',
-    name: 'userConfig',
-    component: () => import('../modals/UserConfig.vue')
+    path: "/redirect",
+    component: () => import("pages/RedirectPage.vue"),
   },
-  {
-    path: '/findPwd',
-    name: 'findPassword',
-    component: () => import('../modals/UserFindPwd.vue')
-  },
-  {
-    path: '/:user/list',
-    name: 'list',
-    component: () => import('pages/ListView.vue')
-  },
-  {
-    path: '/:user/view/:file',
-    name: 'userViewFile',
-    component: () => import('pages/ViewMode.vue')
-  },
-  /*// otherwise redirect to home
-  {path: '/:pathMatch(.*)*', redirect: '/'},*/
-
   // Always leave this as last one,
   // but you can also remove it
   {
-    path: '/:catchAll(.*)*',
-    component: () => import('pages/ErrorNotFound.vue')
-  }
-]
+    path: "/:catchAll(.*)*",
+    component: () => import("pages/ErrorNotFound.vue"),
+  },
+];
 
-export default routes
+export default routes;

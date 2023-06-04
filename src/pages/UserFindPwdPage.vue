@@ -3,7 +3,9 @@
     <div class="row justify-content-center">
       <div class="form">
         <form @submit.prevent="submitForm">
-          <div v-show="errorMessage" class="alert alert-danger failed">{{ errorMessage }}</div>
+          <div v-show="errorMessage" class="alert alert-danger failed">
+            {{ errorMessage }}
+          </div>
           <div class="form-group">
             <label for="findpwd-email">이메일 입력</label>
             <input
@@ -29,24 +31,24 @@
   </div>
 </template>
 <script>
-import { required, email } from '@vuelidate/validators'
-import { useVuelidate } from '@vuelidate/core'
+import { required, email } from "@vuelidate/validators";
+import { useVuelidate } from "@vuelidate/core";
 
 export default {
-  name: 'UserFindPwd',
+  name: "UserFindPwd",
   components: {},
   data() {
     return {
       form: {
-        email: ''
+        email: "",
       },
-      errorMessage: ''
-    }
+      errorMessage: "",
+    };
   },
   setup() {
     return {
-      v$: useVuelidate()
-    }
+      v$: useVuelidate(),
+    };
   },
   created() {},
   mounted() {},
@@ -54,9 +56,9 @@ export default {
   methods: {
     async submitForm() {
       if (!(await this.v$.$validate())) {
-        alert('입력을 확인해주세요.')
-        this.errorMessage = '아이디 또는 비밀번호를 확인해주세요'
-        return
+        alert("입력을 확인해주세요.");
+        this.errorMessage = "아이디 또는 비밀번호를 확인해주세요";
+        return;
       }
       /* this.$axios
           .put('/notice/' + this.form.noticeSeq, this.form)
@@ -69,14 +71,14 @@ export default {
               alert('에러발생.')
               console.log(error)
           }) */
-    }
+    },
   },
   validations() {
     return {
       form: {
-        email: { required, email }
-      }
-    }
-  }
-}
+        email: { required, email },
+      },
+    };
+  },
+};
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <div></div>
+  <div>repo list page</div>
 </template>
 
 <script>
@@ -8,13 +8,13 @@ export default {
   components: {},
   data() {
     return {
-      something: ''
-    }
+      something: "",
+    };
   },
   setup() {},
   created() {},
   mounted() {},
   unmounted() {},
-  methods: {}
-}
+  methods: {},
+};
 </script>

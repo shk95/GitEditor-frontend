@@ -1,6 +1,6 @@
-import {boot} from 'quasar/wrappers'
-import axios from 'axios'
-import {useUserStore} from "stores/user";
+import { boot } from "quasar/wrappers";
+import axios from "axios";
+import { useUserStore } from "stores/user";
 
 // Be careful when using SSR for cross-request state pollution
 // due to creating a Singleton instance here;
@@ -10,29 +10,27 @@ import {useUserStore} from "stores/user";
 // for each client)
 const api = axios.create({
   baseURL: `${import.meta.env.VITE_SERVER_API_URL}`,
-  withCredentials:true,
-  headers: { 'Content-Type': 'application/json' },
-})
+  withCredentials: true,
+  headers: { "Content-Type": "application/json" },
+});
 
-export default boot(({app}) => {
+export default boot(({ app }) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
-
   // app.config.globalProperties.$axios = axios
   // ^ ^ ^ this will allow you to use this.$axios (for Vue Options API form)
   //       so you won't necessarily have to import axios in each vue file
-
   // app.config.globalProperties.$api = api
   // ^ ^ ^ this will allow you to use this.$api (for Vue Options API form)
   //       so you can easily perform requests against your app's API
-})
+});
 
 api.interceptors.request.use(
   (config) => {
     // const isToken = (config.headers || {}).isToken === false
     // const isRepeatSubmit = (config.headers || {}).repeatSubmit === false
-    const token = useUserStore().getToken
+    const token = useUserStore().getToken;
     if (token) {
-      config.headers['Authorization'] = 'Bearer ' + token
+      config.headers["Authorization"] = "Bearer " + token;
     }
 
     // encoding a parameter of get method
@@ -65,36 +63,39 @@ api.interceptors.request.use(
                             }
                         }
                     }*/
-    return config
+    return config;
   },
   (error) => {
-    console.warn('Axios error : ', error)
-    new Error(error)
-    return error
+    console.warn("Axios error : ", error);
+    new Error(error);
+    return error;
   }
-)
+);
 
 const errorCode = {
-  401: '인증 실패, 시스템 리소스에 액세스할 수 없습니다.',
-  403: '현재 작업에 권한이 없습니다.',
-  404: '리소스가 존재하지 않습니다.',
-  default: '알 수 없는 오류입니다.'
-}
+  401: "인증 실패, 시스템 리소스에 액세스할 수 없습니다.",
+  403: "현재 작업에 권한이 없습니다.",
+  404: "리소스가 존재하지 않습니다.",
+  default: "알 수 없는 오류입니다.",
+};
 
-export let require = {reLogin: false}
+export let require = { reLogin: false };
 
 api.interceptors.response.use(
   (res) => {
     //default response code is 200
-    const state = res.data.state || 200
-    const msg = res.data.message || errorCode[state] || errorCode['default']
-    if (res.request.responseType === 'blob' || res.request.responseType === 'arraybuffer') {
-      return res.data
+    const state = res.data.state || 200;
+    const msg = res.data.message || errorCode[state] || errorCode["default"];
+    if (
+      res.request.responseType === "blob" ||
+      res.request.responseType === "arraybuffer"
+    ) {
+      return res.data;
     }
     switch (true) {
       case state === 401:
         if (!require.reLogin) {
-          require.reLogin = true
+          require.reLogin = true;
 
           //TODO access token 만료에대한 재 요청
 
@@ -113,33 +114,33 @@ api.interceptors.response.use(
                                                             });*/
         }
         return Promise.reject(() => {
-          new Error('로그인 세션 만료')
-          return res.data
-        })
+          new Error("로그인 세션 만료");
+          return res.data;
+        });
       case state === 500:
         // ElMessage({message: msg, type: 'error'})
-        return Promise.reject(new Error(msg))
+        return Promise.reject(new Error(msg));
       case state === 601:
         // ElMessage({message: msg, type: 'warning'})
         return Promise.reject(() => {
-          new Error(msg)
-          return res.data
-        })
+          new Error(msg);
+          return res.data;
+        });
       case state !== 200:
         // ElNotification.error({title: msg})
-        return Promise.reject('Unknown error')
+        return Promise.reject("Unknown error");
       default:
-        return Promise.resolve(res.data)
+        return Promise.resolve(res.data);
     }
   },
   (error) => {
-    console.log('Unhandled Server Error : ', error)
+    console.log("Unhandled Server Error : ", error);
 
     // ElMessage({message: message, type: 'error', duration: 5 * 1000})
 
-    return Promise.reject(error)
+    return Promise.reject(error);
   }
-)
+);
 
 /*export function download(url, params, filename, config) {
     downloadLoadingInstance = ElLoading.service({ text: "正在下载数据，请稍候", background: "rgba(0, 0, 0, 0.7)", })
@@ -167,4 +168,4 @@ api.interceptors.response.use(
     })
 }*/
 
-export {api}
+export { api };
