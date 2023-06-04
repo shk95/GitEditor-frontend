@@ -1,30 +1,30 @@
 <script setup>
-import { Field, Form } from 'vee-validate'
-import * as Yup from 'yup'
-import {api} from "boot/axios";
-import {useRoute, useRouter} from "vue-router";
+import { Field, Form } from "vee-validate";
+import * as Yup from "yup";
+import { api } from "boot/axios";
+import { useRoute, useRouter } from "vue-router";
 
 const schema = Yup.object().shape({
-  userId: Yup.string().required('User id is required'),
-  username: Yup.string().required('User name is required')
-})
+  userId: Yup.string().required("User id is required"),
+  username: Yup.string().required("User name is required"),
+});
 
-const route = useRoute()
-const router = useRouter()
+const route = useRoute();
+const router = useRouter();
 async function onSubmit(values, { setErrors }) {
-  const { userId, username } = values
+  const { userId, username } = values;
   api
-    .post('/auth/signup/oauth', { userId, username })
+    .post("/auth/signup/oauth", { userId, username })
     .then(
       () => {
-        alert('회원가입되었습니다.')
-        router.push('/')
+        alert("회원가입되었습니다.");
+        router.push("/");
       },
       (reject) => {
-        setErrors({ apiError: reject.data.message })
+        setErrors({ apiError: reject.data.message });
       }
     )
-    .catch()
+    .catch();
 }
 </script>
 
@@ -33,7 +33,11 @@ async function onSubmit(values, { setErrors }) {
     <div class="row justify-content-center">
       <h2>Register</h2>
       <div class="form">
-        <Form v-slot="{ errors, isSubmitting }" :validation-schema="schema" @submit="onSubmit">
+        <Form
+          v-slot="{ errors, isSubmitting }"
+          :validation-schema="schema"
+          @submit="onSubmit"
+        >
           <div class="mb-3">
             <label class="form-label">User Id</label>
             <Field
@@ -56,7 +60,10 @@ async function onSubmit(values, { setErrors }) {
           </div>
           <div class="mb-3">
             <button :disabled="isSubmitting" class="btn btn-primary">
-              <span v-show="isSubmitting" class="spinner-border spinner-border-sm me-1"></span>
+              <span
+                v-show="isSubmitting"
+                class="spinner-border spinner-border-sm me-1"
+              ></span>
               Register
             </button>
           </div>
