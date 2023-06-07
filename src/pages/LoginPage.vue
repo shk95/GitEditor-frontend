@@ -4,6 +4,7 @@ import * as Yup from "yup";
 import { useUserStore } from "stores/user";
 import socials from "../utils/socials";
 import { useRouter, useRoute } from "vue-router";
+import 'bootstrap'
 
 const userStore = useUserStore(); // TODO 전역으로 사용자 정보 감시
 

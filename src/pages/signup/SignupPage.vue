@@ -120,6 +120,7 @@ import {
 import { useVuelidate } from "@vuelidate/core";
 import { RouterLink } from "vue-router";
 import { api } from "boot/axios";
+import 'bootstrap'
 
 export default {
   name: "SignupPage",
