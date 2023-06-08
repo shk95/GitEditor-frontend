@@ -1,6 +1,6 @@
-import { boot } from "quasar/wrappers";
+import {boot} from "quasar/wrappers";
 import axios from "axios";
-import { useUserStore } from "stores/user";
+import {useUserStore} from "stores/user";
 
 // Be careful when using SSR for cross-request state pollution
 // due to creating a Singleton instance here;
@@ -11,10 +11,10 @@ import { useUserStore } from "stores/user";
 const api = axios.create({
   baseURL: `${import.meta.env.VITE_SERVER_API_URL}`,
   withCredentials: true,
-  headers: { "Content-Type": "application/json" },
+  headers: {"Content-Type": "application/json"},
 });
 
-export default boot(({ app }) => {
+export default boot(({app}) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
   // app.config.globalProperties.$axios = axios
   // ^ ^ ^ this will allow you to use this.$axios (for Vue Options API form)
@@ -72,20 +72,20 @@ api.interceptors.request.use(
   }
 );
 
-const errorCode = {
+const errorCode = {//TODO: error code 수정
   401: "인증 실패, 시스템 리소스에 액세스할 수 없습니다.",
   403: "현재 작업에 권한이 없습니다.",
   404: "리소스가 존재하지 않습니다.",
   default: "알 수 없는 오류입니다.",
 };
 
-export let require = { reLogin: false };
+export let require = {reLogin: false};
 
 api.interceptors.response.use(
   (res) => {
     //default response code is 200
-    const state = res.data.state || 200;
-    const msg = res.data.message || errorCode[state] || errorCode["default"];
+    const status = res.data.status || 200;
+    const msg = res.data.message || errorCode[status] || errorCode["default"];
     if (
       res.request.responseType === "blob" ||
       res.request.responseType === "arraybuffer"
@@ -93,50 +93,37 @@ api.interceptors.response.use(
       return res.data;
     }
     switch (true) {
-      case state === 401:
+      case status === 401:
         if (!require.reLogin) {
           require.reLogin = true;
-
-          //TODO access token 만료에대한 재 요청
-
-          // 사용자 토큰 인증 실패후 메시지를 보여준후 초기화면으로 돌아감
-          /*ElMessageBox.confirm('登录状态已过期，您可以继续留在该页面，或者重新登录', '系统提示', {
-                                                                confirmButtonText: '重新登录',
-                                                                cancelButtonText: '取消',
-                                                                type: 'warning'
-                                                            }).then(() => {
-                                                                require.show = false;
-                                                                useUserStore().logOut().then(() => {
-                                                                    location.href = '/index';
-                                                                })
-                                                            }).catch(() => {
-                                                                require.show = false;
-                                                            });*/
         }
+
         return Promise.reject(() => {
           new Error("로그인 세션 만료");
           return res.data;
         });
-      case state === 500:
+
+      case status === 500:
         // ElMessage({message: msg, type: 'error'})
         return Promise.reject(new Error(msg));
-      case state === 601:
+
+      case status === 601:
         // ElMessage({message: msg, type: 'warning'})
         return Promise.reject(() => {
           new Error(msg);
           return res.data;
         });
-      case state !== 200:
+
+      case status !== 200:
         // ElNotification.error({title: msg})
         return Promise.reject("Unknown error");
+
       default:
         return Promise.resolve(res.data);
     }
   },
   (error) => {
     console.log("Unhandled Server Error : ", error);
-
-    // ElMessage({message: message, type: 'error', duration: 5 * 1000})
 
     return Promise.reject(error);
   }
@@ -168,4 +155,4 @@ api.interceptors.response.use(
     })
 }*/
 
-export { api };
+export {api};
