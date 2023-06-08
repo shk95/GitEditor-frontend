@@ -5,6 +5,9 @@ import {ref} from "vue";
 import {Dark} from "quasar";
 import {useCurrentStore} from "stores/current";
 import {useRouter} from "vue-router";
+import {useQuasar} from "quasar";
+
+const $q = useQuasar();
 
 const leftDrawerOpen = ref(false);
 const userStore = useUserStore();
@@ -28,7 +31,19 @@ const toggleLeftDrawer = () => {
 const logout = () => {
   userStore.logout().then(() => {
     console.log("Logout Success");
+    $q.notify({
+      position:'top',
+      type: 'info',
+      message: '로그아웃하였습니다'
+    })
     router.push("/")
+  }, (reject) => {
+    $q.notify({
+      position:'top',
+      type: 'warning',
+      message: '에러가 발생하였습니다'
+    })
+    console.warn(reject)
   });
 };
 
@@ -136,7 +151,7 @@ const logout = () => {
             <img
               :src="userPrfImgSrc()"
               style="padding-left: 0; padding-right: 0"
-             alt="profile-image"/>
+              alt="profile-image"/>
           </q-avatar>
           <div class="text-weight-bold" v-text="userStore.getUserName"></div>
           <div v-text="userStore.getUserDefaultEmail"></div>
