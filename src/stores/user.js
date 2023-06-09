@@ -47,7 +47,7 @@ export const useUserStore = defineStore("user", {
       this.accessToken = token;
     },
     me() {
-      api
+      return api
         .get("/user/me")
         .then(
           (response) => {
@@ -99,9 +99,10 @@ export const useUserStore = defineStore("user", {
             throw new Error("로그인 실패. 서버 에러.");
           }
           console.log(this.accessToken);
-          this.me();
-          this.startRefreshTokenTimer();
-          return Promise.resolve({message})
+          return this.me().then(r => {
+            this.startRefreshTokenTimer();
+            return Promise.resolve({message})
+          });
         },
         (reject) => {
           console.debug("login error in user store", reject);
@@ -109,11 +110,10 @@ export const useUserStore = defineStore("user", {
         }
       );
     },
-    async loginOAuth(token) {
+    loginOAuth(token) {
       this.accessToken = token;
-      console.log("############ token", token);
-      this.me();
-      this.startRefreshTokenTimer();
+      console.debug("############ this.accessToken", this.accessToken);
+      return this.me();
     },
     logout() {
       return api.post("/auth/logout").then(
@@ -126,7 +126,7 @@ export const useUserStore = defineStore("user", {
         }
       ).catch((error) => Promise.reject(error));
     },
-    async refreshToken() {
+    refreshToken() {
       api
         .post("/auth/reissue", this.accessToken)
         .then((data) => {

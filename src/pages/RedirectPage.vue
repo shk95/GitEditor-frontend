@@ -31,12 +31,12 @@ if (token) {
     url: `${import.meta.env.VITE_SERVER_API_URL}/${queriedParam.url}?${
       queriedParam.param
     }=${code}`,
-  }).then(() => setTimeout(() => router.push("/"), 2000));
+  }).then(() => setTimeout(() => router.push("/"), 1000));
 } else {
   // console.warn('oAuth login error.')
 }
 
-setTimeout(() => router.push("/"), 2000);
+setTimeout(() => router.push("/"), 1000);
 </script>
 <template>
   <h2>

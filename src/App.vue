@@ -14,7 +14,7 @@ const userStore = useUserStore();
 const currentStore = useCurrentStore();
 const router = useRouter();
 
-userStore.refreshToken();
+setTimeout(() => userStore.refreshToken(), 2000)
 
 console.log("Is user logged in?", userStore.isUserLogin);
 
@@ -32,14 +32,14 @@ const logout = () => {
   userStore.logout().then(() => {
     console.log("Logout Success");
     $q.notify({
-      position:'top',
+      position: 'top',
       type: 'info',
       message: '로그아웃하였습니다'
     })
     router.push("/")
   }, (reject) => {
     $q.notify({
-      position:'top',
+      position: 'top',
       type: 'warning',
       message: '에러가 발생하였습니다'
     })
