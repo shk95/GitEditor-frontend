@@ -1,5 +1,5 @@
-import { defineStore } from "pinia";
-import { api } from "boot/axios";
+import {defineStore} from "pinia";
+import {api} from "boot/axios";
 
 export const useUserStore = defineStore("user", {
   state: () => ({
@@ -47,7 +47,7 @@ export const useUserStore = defineStore("user", {
       this.accessToken = token;
     },
     me() {
-      api
+      return api
         .get("/user/me")
         .then(
           (response) => {
@@ -55,7 +55,8 @@ export const useUserStore = defineStore("user", {
             console.log(response?.message, response.data);
             this.saveUser(response.data).then(() => console.log("User saved."));
           },
-          () => {}
+          () => {
+          }
         )
         .catch();
     },
@@ -91,43 +92,41 @@ export const useUserStore = defineStore("user", {
     },
     login(data) {
       return api.post("/auth/login", data).then(
-        ({ data, message }) => {
+        ({data, message}) => {
           console.debug("login data : ", data);
-          alert(message);
           this.accessToken = data?.accessToken;
           if (!this.accessToken) {
             throw new Error("로그인 실패. 서버 에러.");
           }
           console.log(this.accessToken);
-          this.me();
-          this.startRefreshTokenTimer();
+          return this.me().then(r => {
+            this.startRefreshTokenTimer();
+            return Promise.resolve({message})
+          });
         },
         (reject) => {
           console.debug("login error in user store", reject);
-          throw new Error("로그인 실패");
+          return Promise.reject("로그인 실패");
         }
       );
     },
-    async loginOAuth(token) {
+    loginOAuth(token) {
       this.accessToken = token;
-      console.log("############ token", token);
-      this.me();
-      this.startRefreshTokenTimer();
+      console.debug("############ this.accessToken", this.accessToken);
+      return this.me();
     },
     logout() {
       return api.post("/auth/logout").then(
         (resolve) => {
           this.invalidateUser();
-          alert("로그아웃 성공");
-          console.debug(resolve);
         },
         (reject) => {
           console.debug("logout error in user store", reject);
-          throw new Error("logout error in user store");
+          throw new Error("logout error");
         }
-      );
+      ).catch((error) => Promise.reject(error));
     },
-    async refreshToken() {
+    refreshToken() {
       api
         .post("/auth/reissue", this.accessToken)
         .then((data) => {

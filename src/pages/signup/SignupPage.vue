@@ -1,201 +1,179 @@
+<script setup>
+import {api} from "boot/axios";
+import {reactive, ref} from "vue";
+import {formRegx} from "src/utils/form-regx";
+import {useQuasar} from "quasar";
+import {useRouter} from "vue-router";
+
+const $q = useQuasar();
+const router = useRouter();
+
+const formData = reactive({
+  userId: "",
+  username: "",
+  defaultEmail: "",
+  password: "",
+  confirmPassword: "",
+})
+const isPwd = ref(true)
+
+const userIdRule = [userId => userId && formRegx.userId['pattern'].test(userId) || formRegx.userId['message']]
+const passwordRule = [password => password && formRegx.password['pattern'].test(password) || formRegx.password['message']]
+const emailRule = [email => email && formRegx.email['pattern'].test(email) || formRegx.email['message']]
+const nameRule = [name => name && formRegx.username['pattern'].test(name) || formRegx.username['message']]
+
+const onSubmit = () => {
+  api
+    .post("/auth/signup", formData)
+    .then((data) => {
+      console.debug(
+        "signup ok\nmessage : " +
+        data?.message +
+        "\nstatus : " +
+        data?.status
+      );
+      $q.notify({
+        position: 'top',
+        type: 'info',
+        message: '회원가입되었습니다.'
+      })
+      router.push({name: 'redirect'})
+    })
+    .catch((error) => {
+      $q.notify({
+        position: 'top',
+        type: 'warning',
+        message: '에러가 발생하였습니다'
+      })
+      console.log(error);
+    });
+}
+
+const onReset = () => {
+  Object.keys(formData).forEach(key => formData[key] = '')
+}
+
+</script>
+
 <template>
-  <div class="container public">
-    <div class="row justify-content-center">
-      <div class="form">
-        <form @submit.prevent="submitForm">
-          <div v-show="errorMessage" class="alert alert-danger failed">
-            {{ errorMessage }}
-          </div>
-          <div class="form-group">
-            <label for="userId">아이디</label>
-            <input
-              id="userId"
-              v-model="form.userId"
-              class="form-control"
+  <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 q-px-xl">
+    <q-form class="q-gutter-md" @submit="onSubmit" @reset="onReset">
+      <q-list>
+        <q-item>
+          <q-item-section>
+            <q-item-label class="q-pb-xs">Id</q-item-label>
+            <q-input
+              v-model="formData.userId"
+              class="full-width"
+              dense
+              lazy-rules
+              :rules="userIdRule"
               type="text"
-              @blur="v$.form.userId.$touch"
             />
-            <div v-if="v$.form.userId.$dirty" class="field-error">
-              <p
-                v-for="error of v$.form.userId.$errors"
-                :key="error.$uid"
-                class="error"
-                v-text="error.$message"
-              ></p>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="username">닉네임</label>
-            <input
-              id="username"
-              v-model="form.username"
-              class="form-control"
-              type="text"
-              @blur="v$.form.username.$touch"
-            />
-            <div v-if="v$.form.username.$dirty" class="field-error">
-              <p
-                v-for="error of v$.form.username.$errors"
-                :key="error.$uid"
-                class="error"
-                v-text="error.$message"
-              ></p>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="defaultEmail">이메일 주소</label>
-            <input
-              id="defaultEmail"
-              v-model="form.defaultEmail"
-              class="form-control"
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-item-section>
+            <q-item-label class="q-pb-xs">Email</q-item-label>
+            <q-input
+              v-model="formData.defaultEmail"
+              class="full-width"
+              dense
+              lazy-rules
+              :rules="emailRule"
               type="email"
-              @blur="v$.form.defaultEmail.$touch"
             />
-            <div v-if="v$.form.defaultEmail.$dirty" class="field-error">
-              <p
-                v-for="error of v$.form.defaultEmail.$errors"
-                :key="error.$uid"
-                class="error"
-                v-text="error.$message"
-              ></p>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="password">비밀번호</label>
-            <input
-              id="password"
-              v-model="form.password"
-              class="form-control"
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-item-section>
+            <q-item-label class="q-pb-xs">Name</q-item-label>
+            <q-input
+              v-model="formData.username"
+              class="full-width"
+              dense
+              lazy-rules
+              :rules="nameRule"
+              type="text"
+            />
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-item-section>
+            <q-item-label class="q-pb-xs">Password</q-item-label>
+            <q-input
+              v-model="formData.password"
+              class="full-width"
+              dense
+              lazy-rules
+              :rules="passwordRule"
+              :type="isPwd ? 'password' : 'text'"
+            >
+              <template v-slot:append>
+                <q-icon
+                  :name="isPwd ? 'visibility_off' : 'visibility'"
+                  class="cursor-pointer"
+                  @click="isPwd = !isPwd"
+                />
+              </template>
+            </q-input>
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-item-section>
+            <q-item-label class="q-pb-xs">Repeat Password</q-item-label>
+            <q-input
+              v-model="formData.confirmPassword"
+              class="full-width"
+              dense
+              lazy-rules
               type="password"
-              @blur="v$.form.password.$touch"
+              :rules="[password=> password && formData.password===formData.confirmPassword || '비밀번호가 다릅니다.']"
             />
-            <div v-if="v$.form.password.$dirty" class="field-error">
-              <p
-                v-for="error of v$.form.password.$errors"
-                :key="error.$uid"
-                class="error"
-                v-text="error.$message"
-              ></p>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="confirmPassword">비밀번호 확인</label>
-            <input
-              id="confirmPassword"
-              v-model="form.confirmPassword"
-              class="form-control"
-              type="password"
-              @blur="v$.form.confirmPassword.$touch"
-            />
-            <div v-if="v$.form.confirmPassword.$dirty" class="field-error">
-              <p
-                v-for="error of v$.form.confirmPassword.$errors"
-                :key="error.$uid"
-                class="error"
-                v-text="error.$message"
-              ></p>
-            </div>
-          </div>
-          <button class="btn btn-primary btn-block" type="submit">
-            회원가입
-          </button>
-          <p class="text-center text-muted">
-            <RouterLink to="/login">로그인</RouterLink>
-          </p>
-        </form>
+          </q-item-section>
+        </q-item>
+      </q-list>
+      <div class="col">
+        <q-btn
+          class="text-weight-bolder q-px-xl full-width custom-btn"
+          label="Signup"
+          no-caps
+          type="submit"
+        >
+        </q-btn>
+        <q-separator></q-separator>
+        <q-btn
+          class="text-weight-bolder q-px-xl full-width custom-btn"
+          label="Reset"
+          no-caps
+          type="reset"
+        >
+        </q-btn>
       </div>
-    </div>
+    </q-form>
   </div>
 </template>
 
-<script>
-import {
-  required,
-  maxLength,
-  minLength,
-  email,
-  alphaNum,
-  sameAs,
-} from "@vuelidate/validators";
-import { useVuelidate } from "@vuelidate/core";
-import { RouterLink } from "vue-router";
-import { api } from "boot/axios";
+<style scoped>
 
-export default {
-  name: "SignupPage",
-  components: { RouterLink },
-  setup() {
-    return {
-      v$: useVuelidate(),
-    };
-  },
-  data() {
-    return {
-      form: {
-        userId: "",
-        username: "",
-        defaultEmail: "",
-        password: "",
-        confirmPassword: "",
-      },
-      errorMessage: "",
-    };
-  },
-  validations() {
-    return {
-      form: {
-        userId: {
-          required,
-          alphaNum,
-        },
-        username: {
-          required,
-          alphaNum,
-          minLength: minLength(1),
-          maxLength: maxLength(20),
-        },
-        defaultEmail: {
-          required,
-          email,
-        },
-        password: {
-          required,
-          minLength: minLength(1),
-          maxLength: maxLength(20),
-        },
-        confirmPassword: {
-          sameAsPassword: sameAs(this.form.password),
-        },
-      },
-    };
-  },
-  created() {},
-  mounted() {},
-  unmounted() {},
-  methods: {
-    async submitForm() {
-      if (!(await this.v$.$validate())) {
-        this.errorMessage = "회원가입 양식을 확인해주세요";
-        alert("내용을 입력해주세요.");
-        return;
-      }
-      api
-        .post("/auth/signup", this.form)
-        .then((data) => {
-          console.debug(
-            "signup ok\nmessage : " +
-              data?.message +
-              "\nstatus : " +
-              data?.status
-          );
-          alert("가입되었습니다.");
-          // this.$router.push({ name: 'home' })
-        })
-        .catch((error) => {
-          alert("에러발생.");
-          console.log(error);
-        });
-    },
-  },
-};
-</script>
+.custom-btn {
+  border-radius: 5px;
+  background: linear-gradient(145deg, rgb(47, 10, 93) 2%, rgb(45, 17, 123));
+  color: white;
+}
+
+.branding {
+  background-color: #2e3d57;
+}
+
+.custom-input-box input::placeholder {
+  font-size: 15px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.box {
+  background: radial-gradient(200% 150px at 20% -30%, #2e3d57 -10%, transparent 120%);
+  height: 4rem;
+}
+</style>

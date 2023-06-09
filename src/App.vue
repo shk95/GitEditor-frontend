@@ -1,17 +1,20 @@
 <script setup>
-import { RouterView } from "vue-router";
-import { useUserStore } from "stores/user";
-import { ref } from "vue";
-import { Dark } from "quasar";
-import { useCurrentStore } from "stores/current";
-import { useRouter } from "vue-router";
+import {RouterView} from "vue-router";
+import {useUserStore} from "stores/user";
+import {ref} from "vue";
+import {Dark} from "quasar";
+import {useCurrentStore} from "stores/current";
+import {useRouter} from "vue-router";
+import {useQuasar} from "quasar";
+
+const $q = useQuasar();
 
 const leftDrawerOpen = ref(false);
 const userStore = useUserStore();
 const currentStore = useCurrentStore();
 const router = useRouter();
 
-userStore.refreshToken();
+setTimeout(() => userStore.refreshToken(), 2000)
 
 console.log("Is user logged in?", userStore.isUserLogin);
 
@@ -26,9 +29,24 @@ const toggleLeftDrawer = () => {
 };
 
 const logout = () => {
-  console.log("33333333333");
-  userStore.logout().then(() => router.push("/"));
+  userStore.logout().then(() => {
+    console.log("Logout Success");
+    $q.notify({
+      position: 'top',
+      type: 'info',
+      message: '로그아웃하였습니다'
+    })
+    router.push("/")
+  }, (reject) => {
+    $q.notify({
+      position: 'top',
+      type: 'warning',
+      message: '에러가 발생하였습니다'
+    })
+    console.warn(reject)
+  });
 };
+
 </script>
 
 <template>
@@ -43,30 +61,50 @@ const logout = () => {
           icon="menu"
           @click="toggleLeftDrawer"
         />
-        <q-btn dense flat round @click="Dark.toggle()" icon="dark_mode" />
+        <!--        <q-btn dense flat round @click="Dark.toggle()" icon="dark_mode"/>-->
 
         <q-toolbar-title>
           <!--          <q-avatar square>
                       <img v-bind:src="userPrfImgSrc()" width="20px" height="20px"
                            style="!important;padding-left: 0; padding-right: 0">
                     </q-avatar>-->
-          Hello
+          <q-btn flat style="background: none;" label="Git Editor" to="/"></q-btn>
         </q-toolbar-title>
+        <q-btn style="background: none;" outline no-shadow label="Menu">
+          <q-menu transition-show="jump-down"
+                  transition-hide="jump-up">
+            <q-list style="min-width: 100px">
+              <q-item clickable v-close-popup to="/">
+                <q-item-section>Home</q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup @click="Dark.toggle()">
+                <q-item-section>Dark Mode</q-item-section>
+              </q-item>
+              <q-separator/>
+              <div v-if="!userStore.isUserLogin">
+                <q-item clickable v-close-popup to="/login">
+                  <q-item-section>Login</q-item-section>
+                </q-item>
+                <q-item clickable v-close-popup to="/signup">
+                  <q-item-section>Sign up</q-item-section>
+                </q-item>
+              </div>
+              <div v-else>
+                <q-item clickable v-close-popup to="/user/config">
+                  <q-item-section>Settings</q-item-section>
+                </q-item>
+                <q-item clickable v-close-popup @click="logout">
+                  <q-item-section>Logout</q-item-section>
+                </q-item>
+              </div>
+              <q-separator/>
+              <q-item clickable v-close-popup>
+                <q-item-section>Help &amp; Feedback</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
       </q-toolbar>
-
-      <div v-if="!userStore.isUserLogin">
-        <q-tabs align="justify" dense>
-          <q-route-tab to="/" label="Home" />
-          <q-route-tab to="/login" label="Login" />
-          <q-route-tab to="/signup" label="Sign Up" />
-        </q-tabs>
-      </div>
-      <div v-else>
-        <q-tabs align="justify" dense>
-          <q-route-tab to="/" label="Home" />
-          <q-route-tab @click="logout" label="Logout" />
-        </q-tabs>
-      </div>
     </q-header>
 
     <q-drawer
@@ -93,7 +131,7 @@ const logout = () => {
             :to="item.router"
           >
             <q-item-section avatar>
-              <q-icon :name="item.iconName" />
+              <q-icon :name="item.iconName"/>
             </q-item-section>
 
             <q-item-section>
@@ -113,7 +151,7 @@ const logout = () => {
             <img
               :src="userPrfImgSrc()"
               style="padding-left: 0; padding-right: 0"
-            />
+              alt="profile-image"/>
           </q-avatar>
           <div class="text-weight-bold" v-text="userStore.getUserName"></div>
           <div v-text="userStore.getUserDefaultEmail"></div>
@@ -122,7 +160,7 @@ const logout = () => {
     </q-drawer>
 
     <q-page-container>
-      <router-view />
+      <router-view/>
     </q-page-container>
   </q-layout>
 </template>
