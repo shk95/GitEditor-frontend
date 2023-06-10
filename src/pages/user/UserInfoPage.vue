@@ -1,8 +1,9 @@
 <script setup>
-import { useUserStore } from "stores/user";
-import { onBeforeUnmount, onMounted, ref } from "vue";
-import { useQuasar } from "quasar";
-import { api } from "boot/axios";
+import {useUserStore} from "stores/user";
+import {onBeforeUnmount, onMounted, ref} from "vue";
+import {useQuasar} from "quasar";
+import {api} from "boot/axios";
+import socials from "src/utils/socials";
 
 const userStore = useUserStore();
 const $q = useQuasar();
@@ -22,7 +23,7 @@ const onRejected = (rejectedEntries) => {
   });
 };
 
-let progress = ref({ loading: false, percentage: 0 });
+let progress = ref({loading: false, percentage: 0});
 let intervals = null;
 
 function uploadImg() {
@@ -43,7 +44,7 @@ function uploadImg() {
   api
     .post(
       "/user/profile/img",
-      { file: profileImg.value },
+      {file: profileImg.value},
       {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -61,6 +62,22 @@ function uploadImg() {
     .catch((error) => {
       console.error(error);
     });
+}
+
+const addGithubService = () => {
+  console.debug("invoked addgithubservice")
+  api
+    .post('/user/profile/github')
+    .then((resolve) => {
+      console.debug("resolved")
+      setTimeout(() => window.location.href = socials.getSocialLoginUrl('github')
+        , 1000)
+    }, (reject) => {
+
+    })
+    .catch((error) => {
+
+    })
 }
 
 onBeforeUnmount(() => {
@@ -83,7 +100,7 @@ onBeforeUnmount(() => {
           @rejected="onRejected"
         >
           <template v-slot:prepend>
-            <q-icon name="attach_file" />
+            <q-icon name="attach_file"/>
           </template>
         </q-file>
         <q-btn
@@ -95,6 +112,12 @@ onBeforeUnmount(() => {
           icon="cloud_upload"
         />
       </div>
+      <q-btn
+        round
+        color="secondary"
+        @click="addGithubService"
+        label="github 등록"
+      />
     </div>
   </div>
 </template>
