@@ -5,28 +5,26 @@ import {useQuasar} from "quasar";
 import {api} from "boot/axios";
 import socials from "src/utils/socials";
 
-const userStore = useUserStore();
 const $q = useQuasar();
+const userStore = useUserStore();
 
 let profileImg = ref(null);
+let intervals = null;
+let progress = ref({loading: false, percentage: 0});
+
+const isGithubEnabled = userStore.isGithubEnabled
+const isOpenAIEnabled = userStore.isOpenAIEnabled
 
 onMounted(() => {
   userStore.me();
 });
 
-const onRejected = (rejectedEntries) => {
-  // Notify plugin needs to be installed
-  // https://quasar.dev/quasar-plugins/notify#Installation
-  $q.notify({
-    type: "negative",
-    message: `${rejectedEntries.length} file(s) did not pass validation constraints`,
-  });
-};
+onBeforeUnmount(() => {
+  clearInterval(intervals);
+});
 
-let progress = ref({loading: false, percentage: 0});
-let intervals = null;
 
-function uploadImg() {
+const uploadImg = () => {
   progress.value.loading = true;
   progress.value.percentage = 0;
 
@@ -64,8 +62,14 @@ function uploadImg() {
     });
 }
 
+const onRejected = (rejectedEntries) => {
+  $q.notify({
+    type: "negative",
+    message: "올바르지 않은 형식의 파일 입니다.",
+  });
+};
+
 const addGithubService = () => {
-  console.debug("invoked addgithubservice")
   api
     .post('/user/profile/github')
     .then((resolve) => {
@@ -80,43 +84,80 @@ const addGithubService = () => {
     })
 }
 
-onBeforeUnmount(() => {
-  clearInterval(intervals);
-});
+const openAIAccessToken = ref('')
+const addOpenAIService = () => {
+  console.debug("invoked addgithubservice")
+  const data = {accessToken: openAIAccessToken.value};
+  console.debug(data);
+  return api.post("/user/profile/openai", data).then((resolve) => {
+    console.debug(resolve);
+  });
+};
 </script>
 
 <template>
   <h1>user info page</h1>
   <div class="q-pa-md example-row-horizontal-alignment">
     <div class="row justify-center">
-      <div class="col-4" style="text-align: center">
-        <q-img :src="userStore.getUserImg" style="max-width: 100px" fit="cover">
-        </q-img>
-        <q-file
-          color="purple-12"
-          v-model="profileImg"
-          label="Change Profile Image"
-          accept=".jpg, image/*"
-          @rejected="onRejected"
-        >
-          <template v-slot:prepend>
-            <q-icon name="attach_file"/>
-          </template>
-        </q-file>
-        <q-btn
-          :loading="progress.loading"
-          :percentage="progress.percentage"
-          round
-          color="secondary"
-          @click="uploadImg()"
-          icon="cloud_upload"
-        />
+      <div class="col-8" style="text-align: center">
+        <div class="row">
+          <q-img class="col" :src="userStore.getUserImg" style="max-width: 100px" fit="cover">
+          </q-img>
+          <q-file
+            class="col"
+            color="purple-12"
+            v-model="profileImg"
+            label="Change Profile Image"
+            accept=".jpg, image/*"
+            @rejected="onRejected"
+          >
+            <template v-slot:prepend>
+              <q-icon name="attach_file"/>
+            </template>
+          </q-file>
+          <q-btn
+            class="col"
+            :loading="progress.loading"
+            :percentage="progress.percentage"
+            round
+            color="secondary"
+            @click="uploadImg()"
+            icon="cloud_upload"
+            padding="none"
+          />
+        </div>
       </div>
       <q-btn
+        padding="none"
         round
         color="secondary"
         @click="addGithubService"
         label="github 등록"
+      />
+      <div class="row">
+        <div class="q-pl-md q-pr-md col-8">
+          <q-input label="Open AI 등록" v-model="openAIAccessToken" :dense="false"/>
+        </div>
+        <div class="q-pl-md q-pr-md col-4">
+          <q-btn
+            color="primary"
+            icon-right="send"
+            @click="addOpenAIService"
+            label="OpenAI 등록"
+          />
+        </div>
+      </div>
+      <q-toggle
+        v-model="isGithubEnabled"
+        color="green"
+        label="Github 계정 활성화 여부"
+        left-label
+      />
+      <q-toggle
+        v-model="isOpenAIEnabled"
+        color="green"
+        label="Chat GPT 사용 여부"
+        left-label
       />
     </div>
   </div>

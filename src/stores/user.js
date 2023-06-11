@@ -40,6 +40,12 @@ export const useUserStore = defineStore("user", {
     getRole(state) {
       return state.role;
     },
+    isGithubEnabled(state){
+      return state.githubEnabled
+    },
+    isOpenAIEnabled(state){
+      return state.openAiEnabled
+    }
   },
   persist: true,
   actions: {

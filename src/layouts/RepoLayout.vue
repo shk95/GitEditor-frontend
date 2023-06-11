@@ -6,6 +6,13 @@ import { onMounted } from "vue";
 const currentStore = useCurrentStore();
 const defineDrawerItems = [
   {
+    section: "Home",
+    router: {
+      path: "/",
+    },
+    iconName: "home",
+  },
+  {
     section: "Repo List",
     router: {
       path: "/user/repo",
