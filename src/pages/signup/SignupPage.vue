@@ -16,6 +16,7 @@ const formData = reactive({
   confirmPassword: "",
 })
 const isPwd = ref(true)
+const disableBtn = ref(false)
 
 const userIdRule = [userId => userId && formRegx.userId['pattern'].test(userId) || formRegx.userId['message']]
 const passwordRule = [password => password && formRegx.password['pattern'].test(password) || formRegx.password['message']]
@@ -23,6 +24,7 @@ const emailRule = [email => email && formRegx.email['pattern'].test(email) || fo
 const nameRule = [name => name && formRegx.username['pattern'].test(name) || formRegx.username['message']]
 
 const onSubmit = () => {
+  disableBtn.value=true
   api
     .post("/auth/signup", formData)
     .then((data) => {
@@ -56,7 +58,8 @@ const onReset = () => {
 </script>
 
 <template>
-  <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 q-px-xl">
+  <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 q-px-xl"
+       style="margin-left: 250px; margin-right: 250px; margin-top:100px;">
     <q-form class="q-gutter-md" @submit="onSubmit" @reset="onReset">
       <q-list>
         <q-item>
@@ -133,12 +136,13 @@ const onReset = () => {
           </q-item-section>
         </q-item>
       </q-list>
-      <div class="col">
+      <div class="col" style="margin-right: 50px; margin-left: 50px;">
         <q-btn
           class="text-weight-bolder q-px-xl full-width custom-btn"
           label="Signup"
           no-caps
           type="submit"
+          :disable="disableBtn"
         >
         </q-btn>
         <q-separator></q-separator>
@@ -147,6 +151,7 @@ const onReset = () => {
           label="Reset"
           no-caps
           type="reset"
+          color=""
         >
         </q-btn>
       </div>

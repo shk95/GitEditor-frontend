@@ -16,7 +16,7 @@ export const useUserStore = defineStore("user", {
     accessToken: null,
     refreshTokenTimeout: null,
     githubEnabled: false,
-    openAiEnabled: false,
+    openAIEnabled: false,
   }),
   getters: {
     getToken(state) {
@@ -44,7 +44,7 @@ export const useUserStore = defineStore("user", {
       return state.githubEnabled
     },
     isOpenAIEnabled(state){
-      return state.openAiEnabled
+      return state.openAIEnabled
     }
   },
   persist: true,
@@ -60,11 +60,8 @@ export const useUserStore = defineStore("user", {
             console.debug("/user/me response : ", response);
             console.log(response?.message, response.data);
             this.saveUser(response.data).then(() => console.log("User saved."));
-          },
-          () => {
           }
         )
-        .catch();
     },
     async saveUser(data) {
       this.userId = data.userId;
@@ -78,7 +75,7 @@ export const useUserStore = defineStore("user", {
       this.providerUsername = data.providerUsername;
       this.providerImgUrl = data.providerImgUrl;
       this.githubEnabled = data.githubEnabled;
-      this.openAiEnabled = data.openAiEnabled;
+      this.openAIEnabled = data.openAIEnabled;
     },
     invalidateUser() {
       this.userId = null;

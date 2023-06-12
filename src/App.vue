@@ -31,6 +31,8 @@ setTimeout(() => console.debug('chatStore.getChatMessages : ', chatMessages), 30
 //FIXME: chat data 를 store 에서 getter 로 가져올시 생기는 반응성의 문제 => 임시로 ref 객체를 더 만듬
 
 onBeforeMount(() => {
+  console.log("App Mounted")
+  if (!userStore.isOpenAIEnabled) return
   chatMessages.value = []
   chatStore.clear()
   api
@@ -52,6 +54,7 @@ onBeforeMount(() => {
       console.debug("onBeforeMount state : last : ", resolve.data.last)
       chatStore.setLast(resolve.data.last)
     })
+    .catch(e => console.info(e))
 })
 const onLoad = (index, done) => {
   if (chatStore.isLast) {

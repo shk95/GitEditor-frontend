@@ -3,7 +3,6 @@ import {useUserStore} from "stores/user";
 import {onBeforeUnmount, onMounted, ref} from "vue";
 import {useQuasar} from "quasar";
 import {api} from "boot/axios";
-import socials from "src/utils/socials";
 
 const $q = useQuasar();
 const userStore = useUserStore();
@@ -22,7 +21,6 @@ onMounted(() => {
 onBeforeUnmount(() => {
   clearInterval(intervals);
 });
-
 
 const uploadImg = () => {
   progress.value.loading = true;
@@ -69,96 +67,55 @@ const onRejected = (rejectedEntries) => {
   });
 };
 
-const addGithubService = () => {
-  api
-    .post('/user/profile/github')
-    .then((resolve) => {
-      console.debug("resolved")
-      setTimeout(() => window.location.href = socials.getSocialLoginUrl('github')
-        , 1000)
-    }, (reject) => {
 
-    })
-    .catch((error) => {
-
-    })
-}
-
-const openAIAccessToken = ref('')
-const addOpenAIService = () => {
-  console.debug("invoked addgithubservice")
-  const data = {accessToken: openAIAccessToken.value};
-  console.debug(data);
-  return api.post("/user/profile/openai", data).then((resolve) => {
-    console.debug(resolve);
-  });
-};
 </script>
 
 <template>
-  <h1>user info page</h1>
   <div class="q-pa-md example-row-horizontal-alignment">
     <div class="row justify-center">
       <div class="col-8" style="text-align: center">
-        <div class="row">
-          <q-img class="col" :src="userStore.getUserImg" style="max-width: 100px" fit="cover">
-          </q-img>
-          <q-file
-            class="col"
-            color="purple-12"
-            v-model="profileImg"
-            label="Change Profile Image"
-            accept=".jpg, image/*"
-            @rejected="onRejected"
-          >
-            <template v-slot:prepend>
-              <q-icon name="attach_file"/>
-            </template>
-          </q-file>
-          <q-btn
-            class="col"
-            :loading="progress.loading"
-            :percentage="progress.percentage"
-            round
-            color="secondary"
-            @click="uploadImg()"
-            icon="cloud_upload"
-            padding="none"
-          />
+        <div class="q-pa-md q-gutter-sm">
+            <q-img class="col" :src="userStore.getUserImg" style="max-width: 100px" fit="cover">
+            </q-img>
+            <q-file
+              class="col"
+              color="purple-12"
+              v-model="profileImg"
+              label="Change Profile Image"
+              accept=".jpg, image/*"
+              @rejected="onRejected"
+            >
+              <template v-slot:prepend>
+                <q-icon name="attach_file"/>
+              </template>
+            </q-file>
+            <q-btn
+              class="col"
+              :loading="progress.loading"
+              :percentage="progress.percentage"
+              round
+              color="secondary"
+              @click="uploadImg()"
+              icon="cloud_upload"
+              dense
+            />
         </div>
+        <q-toggle
+          v-model="isGithubEnabled"
+          color="green"
+          label="Github 계정 활성화 여부"
+          left-label
+        />
+        <q-toggle
+          v-model="isOpenAIEnabled"
+          color="green"
+          label="Chat GPT 사용 여부"
+          left-label
+        />
       </div>
-      <q-btn
-        padding="none"
-        round
-        color="secondary"
-        @click="addGithubService"
-        label="github 등록"
-      />
-      <div class="row">
-        <div class="q-pl-md q-pr-md col-8">
-          <q-input label="Open AI 등록" v-model="openAIAccessToken" :dense="false"/>
-        </div>
-        <div class="q-pl-md q-pr-md col-4">
-          <q-btn
-            color="primary"
-            icon-right="send"
-            @click="addOpenAIService"
-            label="OpenAI 등록"
-          />
-        </div>
-      </div>
-      <q-toggle
-        v-model="isGithubEnabled"
-        color="green"
-        label="Github 계정 활성화 여부"
-        left-label
-      />
-      <q-toggle
-        v-model="isOpenAIEnabled"
-        color="green"
-        label="Chat GPT 사용 여부"
-        left-label
-      />
+
+
+
     </div>
   </div>
 </template>
