@@ -31,6 +31,7 @@ setTimeout(() => console.debug('chatStore.getChatMessages : ', chatMessages), 30
 //FIXME: chat data 를 store 에서 getter 로 가져올시 생기는 반응성의 문제 => 임시로 ref 객체를 더 만듬
 
 onBeforeMount(() => {
+  chatMessages.value = []
   chatStore.clear()
   api
     .get("/chat", {
@@ -44,7 +45,9 @@ onBeforeMount(() => {
       const {messages} = resolve.data
 
       chatStore.addChatMessagesBefore(messages)
+      console.debug("onBeforeMount state : before reverse : ", messages)
       chatMessages.value.splice(0, 0, ...(messages.reverse()))
+      console.debug("onBeforeMount state : after reverse : ", messages)
 
       console.debug("onBeforeMount state : last : ", resolve.data.last)
       chatStore.setLast(resolve.data.last)
@@ -70,6 +73,7 @@ const onLoad = (index, done) => {
       console.debug("onLoad : get last : ", resolve.data.last)
       console.debug(chatStore.getChatMessages)
       setTimeout(() => console.debug(chatStore.getChatMessages), 3000)
+      setTimeout(() => console.debug("chatMessages local", chatMessages), 3000)
       chatStore.setLast(resolve.data.last)
       done()
     })
@@ -189,6 +193,9 @@ setTimeout(() => userStore.refreshToken(), 2000)
                 <q-item clickable v-close-popup to="/signup">
                   <q-item-section>Sign up</q-item-section>
                 </q-item>
+                <q-item clickable v-close-popup to="/findPwd">
+                  <q-item-section>Find Password</q-item-section>
+                </q-item>
               </div>
               <div v-else>
                 <q-item clickable v-close-popup to="/user/config">
@@ -263,8 +270,7 @@ setTimeout(() => userStore.refreshToken(), 2000)
     <q-page-container>
       <router-view/>
 
-      <!--      <q-page-sticky position="bottom-right" :offset="fabPos" v-if="enableFab">-->
-      <q-page-sticky position="bottom-right" :offset="fabPos">
+      <q-page-sticky position="bottom-right" :offset="fabPos" v-if="enableFab">
         <q-fab
           icon="keyboard_arrow_left"
           direction="left"

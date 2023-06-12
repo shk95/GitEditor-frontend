@@ -1,84 +1,60 @@
-<template>
-  <div class="container public">
-    <div class="row justify-content-center">
-      <div class="form">
-        <form @submit.prevent="submitForm">
-          <div v-show="errorMessage" class="alert alert-danger failed">
-            {{ errorMessage }}
-          </div>
-          <div class="form-group">
-            <label for="findpwd-email">이메일 입력</label>
-            <input
-              type="email"
-              class="form-control"
-              id="findpwd-email"
-              v-model="form.email"
-              @blur="v$.form.email.$touch"
-            />
-            <div class="field-error" v-if="v$.form.email.$dirty">
-              <p
-                class="error"
-                v-for="error of v$.form.email.$errors"
-                :key="error.$uid"
-                v-text="error.$message"
-              ></p>
-            </div>
-          </div>
-          <button type="submit" class="btn btn-primary btn-block">제출</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</template>
-<script>
-import { required, email } from "@vuelidate/validators";
-import { useVuelidate } from "@vuelidate/core";
+<script setup>
+import {ref} from "vue";
+import {api} from "boot/axios";
+import {useQuasar} from "quasar";
 
-export default {
-  name: "UserFindPwd",
-  components: {},
-  data() {
-    return {
-      form: {
-        email: "",
-      },
-      errorMessage: "",
-    };
-  },
-  setup() {
-    return {
-      v$: useVuelidate(),
-    };
-  },
-  created() {},
-  mounted() {},
-  unmounted() {},
-  methods: {
-    async submitForm() {
-      if (!(await this.v$.$validate())) {
-        alert("입력을 확인해주세요.");
-        this.errorMessage = "아이디 또는 비밀번호를 확인해주세요";
-        return;
-      }
-      /* this.$axios
-          .put('/notice/' + this.form.noticeSeq, this.form)
-          .then(() => {
-              console.log('ok\n' + this.form)
-              alert('수정되었습니다.')
-              this.$router.push({ name: 'noticeList' })
-          })
-          .catch((error) => {
-              alert('에러발생.')
-              console.log(error)
-          }) */
-    },
-  },
-  validations() {
-    return {
-      form: {
-        email: { required, email },
-      },
-    };
-  },
+const $q = useQuasar();
+
+const email = ref(null);
+const disableBtn = ref(false)
+
+const changeEmail = (email) => {
+  disableBtn.value = true
+  const data = {defaultEmail: email};
+  console.debug(data);
+  return api
+    .post("/user/password", data)
+    .then((resolve) => {
+      console.debug(resolve);
+      $q.notify({
+        position: 'top',
+        type: 'positive',
+        message: "비밀번호가 변경되었습니다. 이메일을 확인해주세요."
+      })
+      disableBtn.value = false
+    }).catch(() => disableBtn.value = false);
+};
+
+const changeEmailHandler = () => {
+  changeEmail(email.value);
 };
 </script>
+
+<template>
+  <div class="q-pa-md absolute-center">
+    <div>
+      <h5 class="text-center text-h">Find Password</h5>
+    </div>
+    <div class="q-gutter-y-md" style="max-width: 500px">
+      <div class="row" style="text-align: center">
+        <div class="row-cols-auto" style="text-align: center">
+        </div>
+        <div class="q-pl-lg q-pr-md col-8">
+          <q-input label="Input Email" v-model="email" :dense="false"/>
+        </div>
+        <div class="q-pl-md q-pr-md col-4">
+          <q-btn
+            color="primary"
+            icon-right="send"
+            @click="changeEmailHandler"
+            :disable="disableBtn"
+          />
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</template>
+
+<style scoped></style>

@@ -1,6 +1,7 @@
 <script setup>
-import { useCurrentStore } from "stores/current";
-import { onMounted } from "vue";
+import {useCurrentStore} from "stores/current";
+import {onMounted} from "vue";
+
 const currentStore = useCurrentStore();
 const defineDrawerItems = [
   {
@@ -46,13 +47,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <h1>home</h1>
+  <h3>Hello</h3>
   <q-page class="flex flex-center">
-    <img
-      alt="Quasar logo"
-      src="~assets/quasar-logo-vertical.svg"
-      style="width: 200px; height: 200px"
-    />
   </q-page>
 </template>
 
