@@ -1,14 +1,13 @@
 <script setup>
-import {onBeforeMount, ref} from "vue";
-import {RouterView} from "vue-router";
-import {useCurrentStore} from "stores/current";
-import {useUserStore} from "stores/user";
-import {useChatStore} from "stores/chat";
-import {Dark} from "quasar";
-import {useRouter} from "vue-router";
-import {useQuasar} from "quasar";
-import {api} from "boot/axios";
-import {formattedDate} from "./utils/formatter";
+import { onBeforeMount, ref } from "vue";
+import { RouterView } from "vue-router";
+import { useCurrentStore } from "stores/current";
+import { useUserStore } from "stores/user";
+import { useChatStore } from "stores/chat";
+import { Dark } from "quasar";
+import { useRouter } from "vue-router";
+import { useQuasar } from "quasar";
+import { api } from "boot/axios";
 
 const $q = useQuasar();
 
@@ -18,98 +17,98 @@ const chatStore = useChatStore();
 const router = useRouter();
 const leftDrawerOpen = ref(false);
 
-const fabPos = ref([18, 18])
-const draggingFab = ref(false)
-const enableFab = userStore.isOpenAIEnabled
-const chatBox = ref(null)
-
-const chatMessages = ref([])
-
-const chatScrollArea = ref(null)
-
-setTimeout(() => console.debug('chatStore.getChatMessages : ', chatMessages), 3000)
-//FIXME: chat data 를 store 에서 getter 로 가져올시 생기는 반응성의 문제 => 임시로 ref 객체를 더 만듬
+const fabPos = ref([18, 18]);
+const draggingFab = ref(false);
+const enableFab = userStore.isOpenAIEnabled;
+const chatBox = ref(null);
+const chatMessages = ref([]);
+const chatScrollArea = ref(null);
 
 onBeforeMount(() => {
-  chatStore.clear()
+  console.log("App Mounted");
+  loadChatMessages();
+});
+
+const loadChatMessages = () => {
+  chatMessages.value = [];
+  if (!userStore.isOpenAIEnabled) return;
+  console.log("Chat Messages Loading...");
+  if (chatStore.getMessages.length > 0) {
+    chatMessages.value = chatStore.getMessages;
+    return;
+  }
   api
     .get("/chat", {
       params: {
         pageAt: 0,
-        pageSize: 4
-      }
+        pageSize: 4,
+      },
     })
-    .then(resolve => {
-      console.debug("onBeforeMount state : messages : ", resolve.data)
-      const {messages} = resolve.data
-
-      chatStore.addChatMessagesBefore(messages)
-      chatMessages.value.splice(0, 0, ...(messages.reverse()))
-
-      console.debug("onBeforeMount state : last : ", resolve.data.last)
-      chatStore.setLast(resolve.data.last)
+    .then((resolve) => {
+      console.debug("onBeforeMount state : messages : ", resolve.data);
+      let { messages } = resolve.data;
+      chatStore.addMessagesBefore(messages);
+      chatStore.setLast(resolve.data.last);
     })
-})
+    .catch((e) => console.info(e));
+};
+
 const onLoad = (index, done) => {
   if (chatStore.isLast) {
-    done()
-    return
+    done();
+    return;
   }
-  chatStore.nextPage()
+  chatStore.nextPage();
   api
-    .get('/chat', {
-      params: chatStore.getNext
+    .get("/chat", {
+      params: chatStore.getNext,
     })
-    .then(resolve => {
-      console.debug("onLoad : get Messages : ", resolve.data)
-      const {messages} = resolve.data
+    .then((resolve) => {
+      setTimeout(() => {
+        console.debug("Chat Loaded : Messages : ", resolve.data);
+        const { messages } = resolve.data;
 
-      chatStore.addChatMessagesBefore(messages)
-      chatMessages.value.splice(0, 0, ...(messages.reverse()))
+        chatStore.addMessagesBefore(messages);
+        chatMessages.value = chatStore.getMessages;
+        chatStore.setLast(resolve.data.last);
+        done();
+      }, 1500);
+    });
+};
 
-      console.debug("onLoad : get last : ", resolve.data.last)
-      console.debug(chatStore.getChatMessages)
-      setTimeout(() => console.debug(chatStore.getChatMessages), 3000)
-      chatStore.setLast(resolve.data.last)
-      done()
-    })
-}
-
-const promptInput = ref(null)
-const chatPrompt = ref('')
-const promptBtn = ref(null)
-const disablePromptBtn = ref(false)
+const promptInput = ref(null);
+const promptBtn = ref(null);
+const chatPrompt = ref("");
+const disablePromptBtn = ref(false);
 
 const sendMessage = () => {
-  const get = v => api
-    .post('/chat', {prompt: v})
-    .then(resolve => {
-      console.debug("send message resolved: ", resolve)
-      chatPrompt.value = '';
-      const {data} = resolve
-      console.debug("###### send message data : ", data)
+  const get = (v) =>
+    api
+      .post("/chat", { prompt: v })
+      .then((resolve) => {
+        chatPrompt.value = "";
+        const { data } = resolve;
 
-      chatStore.addChatMessageAfter(data)
-      chatMessages.value.push(data)
-
-      chatStore.plusOffset()
-      disablePromptBtn.value = false
-    })
-    .catch(e => disablePromptBtn.value = false)
+        chatStore.addMessageAfter(data);
+        chatMessages.value = chatStore.getMessages;
+        chatStore.plusOffset();
+        disablePromptBtn.value = false;
+      })
+      .catch((e) => (disablePromptBtn.value = false));
 
   if (promptInput.value.validate()) {
-    disablePromptBtn.value = true
-    get(chatPrompt.value)
+    disablePromptBtn.value = true;
+    get(chatPrompt.value);
   } else {
     $q.notify({
-      position: 'top',
-      type: 'info',
-      message: "메시지를 입력해주세요"
-    })
+      position: "top",
+      type: "info",
+      message: "메시지를 입력해주세요",
+    });
   }
-}
+};
 
-const onClick = (event) => chatBox.value.show()
+const onClick = (event) => chatBox.value.show();
 
 const toggleLeftDrawer = () => {
   leftDrawerOpen.value = !leftDrawerOpen.value;
@@ -123,36 +122,35 @@ const userPrfImgSrc = () => {
 };
 
 const logout = () => {
-  userStore.logout().then(() => {
-    console.log("Logout Success");
-    $q.notify({
-      position: 'top',
-      type: 'info',
-      message: '로그아웃하였습니다'
-    })
-    router.push("/")
-  }, (reject) => {
-    $q.notify({
-      position: 'top',
-      type: 'warning',
-      message: '에러가 발생하였습니다'
-    })
-    console.warn(reject)
-  });
+  userStore.logout().then(
+    () => {
+      console.log("Logout Success");
+      $q.notify({
+        position: "top",
+        type: "info",
+        message: "로그아웃하였습니다",
+      });
+      router.push("/");
+    },
+    (reject) => {
+      $q.notify({
+        position: "top",
+        type: "warning",
+        message: "에러가 발생하였습니다",
+      });
+      console.warn(reject);
+    }
+  );
 };
 
 const moveFab = (ev) => {
-  draggingFab.value = ev.isFirst !== true && ev.isFinal !== true
+  draggingFab.value = ev.isFirst !== true && ev.isFinal !== true;
 
-  fabPos.value = [
-    fabPos.value[0] - ev.delta.x,
-    fabPos.value[1] - ev.delta.y
-  ]
-}
+  fabPos.value = [fabPos.value[0] - ev.delta.x, fabPos.value[1] - ev.delta.y];
+};
 
 console.log("Is user logged in?", userStore.isUserLogin);
-setTimeout(() => userStore.refreshToken(), 2000)
-
+setTimeout(() => userStore.refreshToken(), 2000);
 </script>
 
 <template>
@@ -169,11 +167,15 @@ setTimeout(() => userStore.refreshToken(), 2000)
         />
 
         <q-toolbar-title>
-          <q-btn flat style="background: none;" label="Git Editor" to="/"></q-btn>
+          <q-btn
+            flat
+            style="background: none"
+            label="Git Editor"
+            to="/"
+          ></q-btn>
         </q-toolbar-title>
-        <q-btn style="background: none;" outline no-shadow label="Menu">
-          <q-menu transition-show="jump-down"
-                  transition-hide="jump-up">
+        <q-btn style="background: none" outline no-shadow label="Menu">
+          <q-menu transition-show="jump-down" transition-hide="jump-up">
             <q-list style="min-width: 100px">
               <q-item clickable v-close-popup to="/">
                 <q-item-section>Home</q-item-section>
@@ -181,13 +183,16 @@ setTimeout(() => userStore.refreshToken(), 2000)
               <q-item clickable v-close-popup @click="Dark.toggle()">
                 <q-item-section>Dark Mode</q-item-section>
               </q-item>
-              <q-separator/>
+              <q-separator />
               <div v-if="!userStore.isUserLogin">
                 <q-item clickable v-close-popup to="/login">
                   <q-item-section>Login</q-item-section>
                 </q-item>
                 <q-item clickable v-close-popup to="/signup">
                   <q-item-section>Sign up</q-item-section>
+                </q-item>
+                <q-item clickable v-close-popup to="/findPwd">
+                  <q-item-section>Find Password</q-item-section>
                 </q-item>
               </div>
               <div v-else>
@@ -198,7 +203,7 @@ setTimeout(() => userStore.refreshToken(), 2000)
                   <q-item-section>Logout</q-item-section>
                 </q-item>
               </div>
-              <q-separator/>
+              <q-separator />
               <q-item clickable v-close-popup>
                 <q-item-section>Help &amp; Feedback</q-item-section>
               </q-item>
@@ -232,7 +237,7 @@ setTimeout(() => userStore.refreshToken(), 2000)
             :to="item.router"
           >
             <q-item-section avatar>
-              <q-icon :name="item.iconName"/>
+              <q-icon :name="item.iconName" />
             </q-item-section>
 
             <q-item-section>
@@ -252,7 +257,8 @@ setTimeout(() => userStore.refreshToken(), 2000)
             <img
               :src="userPrfImgSrc()"
               style="padding-left: 0; padding-right: 0"
-              alt="profile-image"/>
+              alt="profile-image"
+            />
           </q-avatar>
           <div class="text-weight-bold" v-text="userStore.getUserName"></div>
           <div v-text="userStore.getUserDefaultEmail"></div>
@@ -261,10 +267,9 @@ setTimeout(() => userStore.refreshToken(), 2000)
     </q-drawer>
 
     <q-page-container>
-      <router-view/>
+      <router-view />
 
-      <!--      <q-page-sticky position="bottom-right" :offset="fabPos" v-if="enableFab">-->
-      <q-page-sticky position="bottom-right" :offset="fabPos">
+      <q-page-sticky position="bottom-right" :offset="fabPos" v-if="enableFab">
         <q-fab
           icon="keyboard_arrow_left"
           direction="left"
@@ -274,75 +279,112 @@ setTimeout(() => userStore.refreshToken(), 2000)
         >
           <template v-slot:label="{ opened }">
             <div :class="{ 'fab-animate--hover': opened !== true }">
-              {{ opened !== true ? '' : 'Close' }}
+              {{ opened !== true ? "" : "Close" }}
             </div>
           </template>
 
-          <div class="fixed-bottom-right" style="margin-bottom: 90px; ">
+          <div class="fixed-bottom-right" style="margin-bottom: 90px">
             <q-menu
               anchor="bottom middle"
               self="top left"
-              :offset="[ 0, 8 ]"
+              :offset="[0, 8]"
               ref="chatBox"
             >
-
-              <div class="q-p"
-                   style="width: 100%; max-width: 400px; margin-right: 9px; margin-left:9px; margin-bottom: 8px;">
-                <q-infinite-scroll ref="chatScrollArea" @load="onLoad" :offset="150" reverse scroll-target="chatScroll">
+              <div
+                class="q-p"
+                style="
+                  width: 100%;
+                  max-width: 400px;
+                  margin-right: 9px;
+                  margin-left: 9px;
+                  margin-bottom: 8px;
+                "
+              >
+                <q-infinite-scroll
+                  ref="chatScrollArea"
+                  @load="onLoad"
+                  :offset="850"
+                  reverse
+                  scroll-target="chatScroll"
+                >
                   <template v-slot:loading>
                     <div class="text-center q-my-md">
-                      <q-spinner-dots color="primary" size="30px"/>
+                      <q-spinner-dots color="primary" size="30px" />
                     </div>
                   </template>
 
-                  <div v-for="item in chatMessages" :key="item.createdDate" class="caption q-py-sm" ref="chatScroll">
-                    <q-chat-message
-                      name="GPT"
-                    >
+                  <div
+                    v-for="item in chatMessages"
+                    :key="item.createdDate"
+                    class="caption q-py-sm"
+                    ref="chatScroll"
+                  >
+                    <q-chat-message name="GPT">
                       <div>{{ item.completion }}</div>
-                      <template v-slot:label>{{ item.createdDate.value }}</template>
+                      <template v-slot:label>{{
+                        item.createdDate.value
+                      }}</template>
                       <template v-slot:avatar>
                         <img
                           class="q-message-avatar q-message-avatar--sent"
                           src="https://cdn.quasar.dev/img/avatar1.jpg"
-                        >
+                        />
                       </template>
                     </q-chat-message>
-                    <q-chat-message
-                      sent
-                    >
+                    <q-chat-message sent>
                       <div>{{ item.prompt }}</div>
-                      <template v-slot:name>{{ userStore.getUserName }}</template>
-                      <template v-slot:label>{{ item.createdDate.value }}</template>
+                      <template v-slot:name>{{
+                        userStore.getUserName
+                      }}</template>
+                      <template v-slot:label>{{
+                        item.createdDate.value
+                      }}</template>
                       <template v-slot:avatar>
                         <img
                           class="q-message-avatar q-message-avatar--sent"
                           :src="userStore.getUserImg"
-                        >
+                        />
                       </template>
                     </q-chat-message>
                   </div>
-
                 </q-infinite-scroll>
-                <q-input filled ref="promptInput" v-model="chatPrompt" :rules="[v=>v.length>0||'Cannot be empty']"
-                         lazy-rules type="text" maxlength="500">
+                <q-input
+                  filled
+                  ref="promptInput"
+                  v-model="chatPrompt"
+                  :rules="[(v) => v.length > 0 || 'Cannot be empty']"
+                  lazy-rules
+                  type="text"
+                  maxlength="500"
+                >
                   <template v-slot:prepend>
-                    <q-icon name="lightbulb"/>
+                    <q-icon name="lightbulb" />
                   </template>
                   <template v-slot:after>
-                    <q-btn ref="promptBtn" @click="sendMessage" outline color="secondary" round flat icon="send"
-                           :disable="disablePromptBtn"/>
+                    <q-btn
+                      ref="promptBtn"
+                      @click="sendMessage"
+                      outline
+                      color="secondary"
+                      round
+                      flat
+                      icon="send"
+                      :disable="disablePromptBtn"
+                    />
                   </template>
                 </q-input>
               </div>
-
             </q-menu>
           </div>
 
-          <q-fab-action @click="onClick" color="primary" icon="question_answer" :disable="draggingFab"/>
+          <q-fab-action
+            @click="onClick"
+            color="primary"
+            icon="question_answer"
+            :disable="draggingFab"
+          />
         </q-fab>
       </q-page-sticky>
-
     </q-page-container>
   </q-layout>
 </template>

@@ -1,6 +1,6 @@
-import {boot} from "quasar/wrappers";
+import { boot } from "quasar/wrappers";
 import axios from "axios";
-import {useUserStore} from "stores/user";
+import { useUserStore } from "stores/user";
 
 // Be careful when using SSR for cross-request state pollution
 // due to creating a Singleton instance here;
@@ -11,10 +11,10 @@ import {useUserStore} from "stores/user";
 const api = axios.create({
   baseURL: `${import.meta.env.VITE_SERVER_API_URL}`,
   withCredentials: true,
-  headers: {"Content-Type": "application/json"},
+  headers: { "Content-Type": "application/json" },
 });
 
-export default boot(({app}) => {
+export default boot(({ app }) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
   // app.config.globalProperties.$axios = axios
   // ^ ^ ^ this will allow you to use this.$axios (for Vue Options API form)
@@ -22,13 +22,13 @@ export default boot(({app}) => {
   // app.config.globalProperties.$api = api
   // ^ ^ ^ this will allow you to use this.$api (for Vue Options API form)
   //       so you can easily perform requests against your app's API
-  const userStore = useUserStore()
+  const userStore = useUserStore();
 
   api.interceptors.request.use(
     (config) => {
       // const isToken = (config.headers || {}).isToken === false
       // const isRepeatSubmit = (config.headers || {}).repeatSubmit === false
-      const token = userStore.getToken
+      const token = userStore.getToken;
       if (token) {
         config.headers["Authorization"] = "Bearer " + token;
       }
@@ -72,7 +72,8 @@ export default boot(({app}) => {
     }
   );
 
-  const errorCode = {//TODO: error code 수정
+  const errorCode = {
+    //TODO: error code 수정
     401: "인증 실패, 시스템 리소스에 액세스할 수 없습니다.",
     403: "현재 작업에 권한이 없습니다.",
     404: "리소스가 존재하지 않습니다.",
@@ -154,5 +155,5 @@ export default boot(({app}) => {
     })
 }*/
 
-export let require = {reLogin: false};
-export {api};
+export let require = { reLogin: false };
+export { api };

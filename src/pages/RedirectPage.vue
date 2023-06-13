@@ -1,8 +1,8 @@
 <script setup>
-import {useUserStore} from "stores/user";
-import {useRoute, useRouter} from "vue-router";
-import {api} from "boot/axios";
-import {useQuasar} from "quasar";
+import { useUserStore } from "stores/user";
+import { useRoute, useRouter } from "vue-router";
+import { api } from "boot/axios";
+import { useQuasar } from "quasar";
 
 const $q = useQuasar();
 
@@ -15,11 +15,11 @@ const redirectType = Object.freeze({
     url: "user/email",
     method: "get",
     param: "code",
-    self: false
+    self: false,
   },
   addGithubService: {
     message: "서비스가 추가되었습니다",
-    self: true
+    self: true,
   },
 });
 
@@ -33,12 +33,12 @@ if (token) {
   userStore.loginOAuth(token).then(() => router.push("/"));
 } else if (queriedParam) {
   if (queriedParam.self) {
-    router.push("/")
+    router.push("/");
     $q.notify({
-      position: 'top',
-      type: 'positive',
-      message: queriedParam.message
-    })
+      position: "top",
+      type: "positive",
+      message: queriedParam.message,
+    });
   } else {
     const code = route.query.code;
     console.log("redirect invoked. code : ", code);
@@ -58,6 +58,6 @@ setTimeout(() => router.push("/"), 1000);
 <template>
   <h2>
     Redirect...
-    <q-spinner color="primary" size="3em" :thickness="10"/>
+    <q-spinner color="primary" size="3em" :thickness="10" />
   </h2>
 </template>
