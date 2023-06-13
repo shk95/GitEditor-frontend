@@ -1,6 +1,6 @@
 <script setup>
-import {useCurrentStore} from "stores/current";
-import {onMounted} from "vue";
+import { useCurrentStore } from "stores/current";
+import { onMounted } from "vue";
 
 const currentStore = useCurrentStore();
 const defineDrawerItems = [
@@ -48,8 +48,7 @@ onMounted(() => {
 
 <template>
   <h3>Hello</h3>
-  <q-page class="flex flex-center">
-  </q-page>
+  <q-page class="flex flex-center"> </q-page>
 </template>
 
 <style scoped></style>

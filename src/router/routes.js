@@ -123,7 +123,7 @@ const routes = [
   },
   {
     path: "/redirect",
-    name: 'redirect',
+    name: "redirect",
     component: () => import("pages/RedirectPage.vue"),
   },
   // Always leave this as last one,

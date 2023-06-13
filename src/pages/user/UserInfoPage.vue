@@ -1,18 +1,18 @@
 <script setup>
-import {useUserStore} from "stores/user";
-import {onBeforeUnmount, onMounted, ref} from "vue";
-import {useQuasar} from "quasar";
-import {api} from "boot/axios";
+import { useUserStore } from "stores/user";
+import { onBeforeUnmount, onMounted, ref } from "vue";
+import { useQuasar } from "quasar";
+import { api } from "boot/axios";
 
 const $q = useQuasar();
 const userStore = useUserStore();
 
 let profileImg = ref(null);
 let intervals = null;
-let progress = ref({loading: false, percentage: 0});
+let progress = ref({ loading: false, percentage: 0 });
 
-const isGithubEnabled = userStore.isGithubEnabled
-const isOpenAIEnabled = userStore.isOpenAIEnabled
+const isGithubEnabled = userStore.isGithubEnabled;
+const isOpenAIEnabled = userStore.isOpenAIEnabled;
 
 onMounted(() => {
   userStore.me();
@@ -40,7 +40,7 @@ const uploadImg = () => {
   api
     .post(
       "/user/profile/img",
-      {file: profileImg.value},
+      { file: profileImg.value },
       {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -58,7 +58,7 @@ const uploadImg = () => {
     .catch((error) => {
       console.error(error);
     });
-}
+};
 
 const onRejected = (rejectedEntries) => {
   $q.notify({
@@ -66,8 +66,6 @@ const onRejected = (rejectedEntries) => {
     message: "올바르지 않은 형식의 파일 입니다.",
   });
 };
-
-
 </script>
 
 <template>
@@ -75,30 +73,35 @@ const onRejected = (rejectedEntries) => {
     <div class="row justify-center">
       <div class="col-8" style="text-align: center">
         <div class="q-pa-md q-gutter-sm">
-            <q-img class="col" :src="userStore.getUserImg" style="max-width: 100px" fit="cover">
-            </q-img>
-            <q-file
-              class="col"
-              color="purple-12"
-              v-model="profileImg"
-              label="Change Profile Image"
-              accept=".jpg, image/*"
-              @rejected="onRejected"
-            >
-              <template v-slot:prepend>
-                <q-icon name="attach_file"/>
-              </template>
-            </q-file>
-            <q-btn
-              class="col"
-              :loading="progress.loading"
-              :percentage="progress.percentage"
-              round
-              color="secondary"
-              @click="uploadImg()"
-              icon="cloud_upload"
-              dense
-            />
+          <q-img
+            class="col"
+            :src="userStore.getUserImg"
+            style="max-width: 100px"
+            fit="cover"
+          >
+          </q-img>
+          <q-file
+            class="col"
+            color="purple-12"
+            v-model="profileImg"
+            label="Change Profile Image"
+            accept=".jpg, image/*"
+            @rejected="onRejected"
+          >
+            <template v-slot:prepend>
+              <q-icon name="attach_file" />
+            </template>
+          </q-file>
+          <q-btn
+            class="col"
+            :loading="progress.loading"
+            :percentage="progress.percentage"
+            round
+            color="secondary"
+            @click="uploadImg()"
+            icon="cloud_upload"
+            dense
+          />
         </div>
         <q-toggle
           v-model="isGithubEnabled"
@@ -113,9 +116,6 @@ const onRejected = (rejectedEntries) => {
           left-label
         />
       </div>
-
-
-
     </div>
   </div>
 </template>

@@ -8,7 +8,7 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
 
-const {configure} = require("quasar/wrappers");
+const { configure } = require("quasar/wrappers");
 
 module.exports = configure(async function (ctx) {
   const open = await import("open");
@@ -124,9 +124,7 @@ module.exports = configure(async function (ctx) {
       // directives: [],
 
       // Quasar plugins
-      plugins: [
-        "Notify", 'Dialog'
-      ],
+      plugins: ["Notify", "Dialog"],
     },
 
     animations: "all", // --- includes all animations

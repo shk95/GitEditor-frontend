@@ -6,7 +6,7 @@ export default {
       height: "32px",
       comment: "구글 로그인",
     },
-   /* {
+    /* {
       socialType: "facebook",
       width: "32px",
       height: "32px",
