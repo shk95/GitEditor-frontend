@@ -18,17 +18,21 @@ const changeEmailHandler = () => {
 </script>
 
 <template>
-  <div class="q-pa-md">
-    <div class="q-gutter-y-md column" style="max-width: 300px">
-      <q-input v-model="email" :dense="false" />
+  <div class="q-pa-md absolute-center">
+    <div class="q-gutter-y-md" style="max-width: 300px">
+      <div class="row">
+        <div class="q-pl-md q-pr-md col-8">
+          <q-input label="Change Email" v-model="email" :dense="false" />
+        </div>
+        <div class="q-pl-md q-pr-md col-4">
+          <q-btn
+            color="primary"
+            icon-right="send"
+            @click="changeEmailHandler"
+          />
+        </div>
+      </div>
     </div>
-    <q-btn
-      color="red"
-      icon="mail"
-      icon-right="send"
-      label="Submit"
-      @click="changeEmailHandler"
-    />
   </div>
 </template>
 

@@ -10,13 +10,12 @@ export const useCurrentStore = defineStore("current", {
       },
     ],
   }),
-
+  persist: true,
   getters: {
     getDrawerItems(state) {
       return state.drawerItems;
     },
   },
-
   actions: {
     setDrawerItems(drawerItems) {
       this.drawerItems = drawerItems;

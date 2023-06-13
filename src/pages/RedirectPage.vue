@@ -2,6 +2,9 @@
 import { useUserStore } from "stores/user";
 import { useRoute, useRouter } from "vue-router";
 import { api } from "boot/axios";
+import { useQuasar } from "quasar";
+
+const $q = useQuasar();
 
 const userStore = useUserStore();
 const route = useRoute();
@@ -12,6 +15,11 @@ const redirectType = Object.freeze({
     url: "user/email",
     method: "get",
     param: "code",
+    self: false,
+  },
+  addGithubService: {
+    message: "서비스가 추가되었습니다",
+    self: true,
   },
 });
 
@@ -24,19 +32,28 @@ if (token) {
   console.log("token", token);
   userStore.loginOAuth(token).then(() => router.push("/"));
 } else if (queriedParam) {
-  const code = route.query.code;
-  console.log("redirect invoked. code : ", code);
-  api({
-    method: queriedParam.method,
-    url: `${import.meta.env.VITE_SERVER_API_URL}/${queriedParam.url}?${
-      queriedParam.param
-    }=${code}`,
-  }).then(() => setTimeout(() => router.push("/"), 2000));
+  if (queriedParam.self) {
+    router.push("/");
+    $q.notify({
+      position: "top",
+      type: "positive",
+      message: queriedParam.message,
+    });
+  } else {
+    const code = route.query.code;
+    console.log("redirect invoked. code : ", code);
+    api({
+      method: queriedParam.method,
+      url: `${import.meta.env.VITE_SERVER_API_URL}/${queriedParam.url}?${
+        queriedParam.param
+      }=${code}`,
+    }).then(() => setTimeout(() => router.push("/"), 1000));
+  }
 } else {
   // console.warn('oAuth login error.')
 }
 
-setTimeout(() => router.push("/"), 2000);
+setTimeout(() => router.push("/"), 1000);
 </script>
 <template>
   <h2>

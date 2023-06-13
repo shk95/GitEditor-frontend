@@ -96,17 +96,17 @@ module.exports = configure(async function (ctx) {
     framework: {
       config: {
         brand: {
-          primary: "#8000ff",
-          secondary: "#a626a6",
+          primary: "#63239f",
+          secondary: "#99bf4f",
           accent: "#9C27B0",
 
-          dark: "#1d1d1d",
-          "dark-page": "#121212",
+          dark: "#32004b",
+          "dark-page": "#212121",
 
           positive: "#21BA45",
           negative: "#C10015",
-          info: "#31CCEC",
-          warning: "#F2C037",
+          info: "#116d91",
+          warning: "#caa81f",
         },
         notify: {
           /* look at QuasarConfOptions from the API card */
@@ -124,7 +124,7 @@ module.exports = configure(async function (ctx) {
       // directives: [],
 
       // Quasar plugins
-      plugins: ["Notify"],
+      plugins: ["Notify", "Dialog"],
     },
 
     animations: "all", // --- includes all animations

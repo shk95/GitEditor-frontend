@@ -1,79 +1,147 @@
 <script setup>
-import { Field, Form } from "vee-validate";
-import * as Yup from "yup";
 import { api } from "boot/axios";
-import { useRoute, useRouter } from "vue-router";
+import { reactive, ref } from "vue";
+import { formRegx } from "src/utils/form-regx";
+import { useQuasar } from "quasar";
+import { useRouter } from "vue-router";
 
-const schema = Yup.object().shape({
-  userId: Yup.string().required("User id is required"),
-  username: Yup.string().required("User name is required"),
-});
-
-const route = useRoute();
+const $q = useQuasar();
 const router = useRouter();
-async function onSubmit(values, { setErrors }) {
-  const { userId, username } = values;
+
+const formData = reactive({
+  userId: "",
+  username: "",
+});
+const disableBtn = ref(false);
+
+const userIdRule = [
+  (userId) =>
+    (userId && formRegx.userId["pattern"].test(userId)) ||
+    formRegx.userId["message"],
+];
+const nameRule = [
+  (name) =>
+    (name && formRegx.username["pattern"].test(name)) ||
+    formRegx.username["message"],
+];
+
+const onSubmit = () => {
+  disableBtn.value = true;
   api
-    .post("/auth/signup/oauth", { userId, username })
-    .then(
-      () => {
-        alert("회원가입되었습니다.");
-        router.push("/");
-      },
-      (reject) => {
-        setErrors({ apiError: reject.data.message });
-      }
-    )
-    .catch();
-}
+    .post("/auth/signup/oauth", formData)
+    .then((data) => {
+      console.debug(
+        "signup ok\nmessage : " + data?.message + "\nstatus : " + data?.status
+      );
+      $q.notify({
+        position: "top",
+        type: "info",
+        message: "회원가입되었습니다.",
+      });
+      router.push({ name: "redirect" });
+    },reject=>{
+      $q.notify({
+        position: "top",
+        type: "warning",
+        message: reject?.message,
+      });
+    })
+    .catch((error) => {
+      $q.notify({
+        position: "top",
+        type: "warning",
+        message: "에러가 발생하였습니다",
+      });
+      console.log(error);
+    });
+};
+
+const onReset = () => {
+  Object.keys(formData).forEach((key) => (formData[key] = ""));
+};
 </script>
 
 <template>
-  <div class="container public">
-    <div class="row justify-content-center">
-      <h2>Register</h2>
-      <div class="form">
-        <Form
-          v-slot="{ errors, isSubmitting }"
-          :validation-schema="schema"
-          @submit="onSubmit"
-        >
-          <div class="mb-3">
-            <label class="form-label">User Id</label>
-            <Field
-              :class="{ 'is-invalid': errors.userId }"
-              class="form-control"
-              name="userId"
+  <div
+    class="col-lg-6 col-md-6 col-sm-12 col-xs-12 q-px-xl"
+    style="margin-left: 250px; margin-right: 250px; margin-top: 100px"
+  >
+    <h4 class="text-center" style="position: relative; right:18px;">Signup</h4>
+    <q-form class="q-gutter-md" @submit="onSubmit" @reset="onReset">
+      <q-list>
+        <q-item>
+          <q-item-section>
+            <q-item-label class="q-pb-xs">Id</q-item-label>
+            <q-input
+              v-model="formData.userId"
+              class="full-width"
+              dense
+              lazy-rules
+              :rules="userIdRule"
               type="text"
             />
-            <div class="invalid-feedback">{{ errors.userId }}</div>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">User Name</label>
-            <Field
-              :class="{ 'is-invalid': errors.username }"
-              class="form-control"
-              name="username"
-              type="username"
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-item-section>
+            <q-item-label class="q-pb-xs">Name</q-item-label>
+            <q-input
+              v-model="formData.username"
+              class="full-width"
+              dense
+              lazy-rules
+              :rules="nameRule"
+              type="text"
             />
-            <div class="invalid-feedback">{{ errors.username }}</div>
-          </div>
-          <div class="mb-3">
-            <button :disabled="isSubmitting" class="btn btn-primary">
-              <span
-                v-show="isSubmitting"
-                class="spinner-border spinner-border-sm me-1"
-              ></span>
-              Register
-            </button>
-          </div>
-          <div v-if="errors.apiError" class="alert alert-danger mt-3 mb-0">
-            {{ errors.apiError }}
-          </div>
-        </Form>
+          </q-item-section>
+        </q-item>
+      </q-list>
+      <div class="col" style="margin-right: 50px; margin-left: 50px">
+        <q-btn
+          class="text-weight-bolder q-px-xl full-width custom-btn"
+          label="Signup"
+          no-caps
+          type="submit"
+          :disable="disableBtn"
+        >
+        </q-btn>
+        <q-separator color="transparent"></q-separator>
+        <q-btn
+          class="text-weight-bolder q-px-xl full-width custom-btn"
+          label="Reset"
+          no-caps
+          type="reset"
+          color=""
+        >
+        </q-btn>
       </div>
-    </div>
+    </q-form>
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.custom-btn {
+  border-radius: 5px;
+  background: linear-gradient(145deg, rgb(47, 10, 93) 2%, rgb(45, 17, 123));
+  color: white;
+}
+
+.branding {
+  background-color: #2e3d57;
+}
+
+.custom-input-box input::placeholder {
+  font-size: 15px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.box {
+  background: radial-gradient(
+    200% 150px at 20% -30%,
+    #2e3d57 -10%,
+    transparent 120%
+  );
+  height: 4rem;
+}
+</style>
