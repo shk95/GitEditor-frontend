@@ -8,7 +8,6 @@ import {Dark} from "quasar";
 import {useRouter} from "vue-router";
 import {useQuasar} from "quasar";
 import {api} from "boot/axios";
-import {formattedDate} from "./utils/formatter";
 
 const $q = useQuasar();
 
@@ -22,19 +21,22 @@ const fabPos = ref([18, 18])
 const draggingFab = ref(false)
 const enableFab = userStore.isOpenAIEnabled
 const chatBox = ref(null)
-
 const chatMessages = ref([])
-
 const chatScrollArea = ref(null)
-
-setTimeout(() => console.debug('chatStore.getChatMessages : ', chatMessages), 3000)
-//FIXME: chat data 를 store 에서 getter 로 가져올시 생기는 반응성의 문제 => 임시로 ref 객체를 더 만듬
 
 onBeforeMount(() => {
   console.log("App Mounted")
-  if (!userStore.isOpenAIEnabled) return
+  loadChatMessages()
+})
+
+const loadChatMessages = () => {
   chatMessages.value = []
-  chatStore.clear()
+  if (!userStore.isOpenAIEnabled) return
+  console.log("Chat Messages Loading...")
+  if (chatStore.getMessages.length > 0) {
+    chatMessages.value = chatStore.getMessages
+    return
+  }
   api
     .get("/chat", {
       params: {
@@ -44,18 +46,13 @@ onBeforeMount(() => {
     })
     .then(resolve => {
       console.debug("onBeforeMount state : messages : ", resolve.data)
-      const {messages} = resolve.data
-
-      chatStore.addChatMessagesBefore(messages)
-      console.debug("onBeforeMount state : before reverse : ", messages)
-      chatMessages.value.splice(0, 0, ...(messages.reverse()))
-      console.debug("onBeforeMount state : after reverse : ", messages)
-
-      console.debug("onBeforeMount state : last : ", resolve.data.last)
+      let {messages} = resolve.data
+      chatStore.addMessagesBefore(messages)
       chatStore.setLast(resolve.data.last)
     })
     .catch(e => console.info(e))
-})
+}
+
 const onLoad = (index, done) => {
   if (chatStore.isLast) {
     done()
@@ -67,38 +64,32 @@ const onLoad = (index, done) => {
       params: chatStore.getNext
     })
     .then(resolve => {
-      console.debug("onLoad : get Messages : ", resolve.data)
-      const {messages} = resolve.data
+      setTimeout(() => {
+        console.debug("Chat Loaded : Messages : ", resolve.data)
+        const {messages} = resolve.data
 
-      chatStore.addChatMessagesBefore(messages)
-      chatMessages.value.splice(0, 0, ...(messages.reverse()))
-
-      console.debug("onLoad : get last : ", resolve.data.last)
-      console.debug(chatStore.getChatMessages)
-      setTimeout(() => console.debug(chatStore.getChatMessages), 3000)
-      setTimeout(() => console.debug("chatMessages local", chatMessages), 3000)
-      chatStore.setLast(resolve.data.last)
-      done()
+        chatStore.addMessagesBefore(messages)
+        chatMessages.value = chatStore.getMessages
+        chatStore.setLast(resolve.data.last)
+        done()
+      }, 1500)
     })
 }
 
 const promptInput = ref(null)
-const chatPrompt = ref('')
 const promptBtn = ref(null)
+const chatPrompt = ref('')
 const disablePromptBtn = ref(false)
 
 const sendMessage = () => {
   const get = v => api
     .post('/chat', {prompt: v})
     .then(resolve => {
-      console.debug("send message resolved: ", resolve)
       chatPrompt.value = '';
       const {data} = resolve
-      console.debug("###### send message data : ", data)
 
-      chatStore.addChatMessageAfter(data)
-      chatMessages.value.push(data)
-
+      chatStore.addMessageAfter(data)
+      chatMessages.value = chatStore.getMessages
       chatStore.plusOffset()
       disablePromptBtn.value = false
     })
@@ -297,7 +288,7 @@ setTimeout(() => userStore.refreshToken(), 2000)
 
               <div class="q-p"
                    style="width: 100%; max-width: 400px; margin-right: 9px; margin-left:9px; margin-bottom: 8px;">
-                <q-infinite-scroll ref="chatScrollArea" @load="onLoad" :offset="150" reverse scroll-target="chatScroll">
+                <q-infinite-scroll ref="chatScrollArea" @load="onLoad" :offset="850" reverse scroll-target="chatScroll">
                   <template v-slot:loading>
                     <div class="text-center q-my-md">
                       <q-spinner-dots color="primary" size="30px"/>

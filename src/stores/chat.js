@@ -1,5 +1,4 @@
 import {defineStore} from "pinia";
-import {api} from "boot/axios";
 
 export const useChatStore = defineStore("chat", {
   state: () => ({
@@ -11,7 +10,7 @@ export const useChatStore = defineStore("chat", {
   }),
   persist: true,
   getters: {
-    getChatMessages(state) {
+    getMessages(state) {
       return state.chat
     },
     getNext(state) {
@@ -31,21 +30,25 @@ export const useChatStore = defineStore("chat", {
     nextPage() {
       this.pageAt++
     },
-    addChatMessageAfter(chatMessage) { // chatMessages : {}, 리스트 끝 에 추가. 리스트의 끝이 최신.
-      this.chat.push(chatMessage)
-    },
-    addChatMessagesBefore(chatMessages) { // chatMessages : [{}]
-      this.chat.splice(0, 0, ...(chatMessages.reverse()))
-    },
     setLast(last) {
       this.last = last
     },
+    addMessageAfter(message) { // chatMessages : {}, 리스트 끝 에 추가. 리스트의 끝이 최신.
+      this.chat.push(message)
+    },
+    addMessagesBefore(messages) { // chatMessages : [{}]
+      const list = []
+      for (let i = 0; i < messages.length; i++) {
+        list.unshift(messages[i])
+      }
+      this.chat.splice(0, 0, ...list)
+    },
     clear() {
-      this.chat = []
       this.offset = 0
       this.pageAt = 0
       this.pageSize = 4
       this.last = false
+      this.chat = []
     }
   }
 });
