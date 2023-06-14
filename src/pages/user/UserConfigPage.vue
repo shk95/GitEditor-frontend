@@ -1,10 +1,10 @@
 <script setup>
-import { api } from "boot/axios";
-import { onMounted, reactive, ref, toRef } from "vue";
-import { formRegx } from "src/utils/form-regx";
-import { useQuasar } from "quasar";
-import { useRouter } from "vue-router";
-import { useUserStore } from "stores/user";
+import {api} from "boot/axios";
+import {onMounted, reactive, ref, toRef} from "vue";
+import {formRegx} from "src/utils/form-regx";
+import {useQuasar} from "quasar";
+import {useRouter} from "vue-router";
+import {useUserStore} from "stores/user";
 import socials from "src/utils/socials";
 
 const $q = useQuasar();
@@ -62,18 +62,18 @@ const rules = {
 
 const submitEmail = () => {
   emailRef.value.validate()
-    ? updateUser({ newEmail: form.email })
+    ? updateUser({newEmail: form.email})
     : formAlert();
 };
 
 const submitUsername = () => {
   usernameRef.value.validate()
-    ? updateUser({ newUsername: form.username })
+    ? updateUser({newUsername: form.username})
     : formAlert();
 };
 const submitPassword = () => {
   passwordRef.value.validate()
-    ? updateUser({ newPassword: form.password })
+    ? updateUser({newPassword: form.password})
     : formAlert();
 };
 
@@ -140,7 +140,7 @@ const accountDeletion = () => {
         type: "info",
         message: resolve?.message,
       });
-      router.push({ name: "home" });
+      router.push({name: "home"});
     })
     .catch((error) => {
       $q.notify({
@@ -187,7 +187,8 @@ const addGithubService = () => {
         return new Error(reject?.message);
       }
     )
-    .catch((error) => {});
+    .catch((error) => {
+    });
 };
 
 const alertAddOpenAIService = () => {
@@ -215,7 +216,7 @@ const addOpenAIService = () => {
   if (!accessTokenRef.value.validate()) {
     return;
   }
-  const data = { accessToken: form.accessToken };
+  const data = {accessToken: form.accessToken};
   return api.post("/user/profile/openai", data).then((resolve) => {
     $q.notify({
       position: "top",
@@ -275,7 +276,7 @@ const addOpenAIService = () => {
             :rules="rules.username"
           >
             <template v-slot:append>
-              <q-btn round dense flat icon="send" @click="submitUsername" />
+              <q-btn round dense flat icon="send" @click="submitUsername"/>
             </template>
           </q-input>
         </q-item-section>
@@ -328,7 +329,8 @@ const addOpenAIService = () => {
       <q-item>
         <q-item-section>
           <q-item-label class="q-pb-xs"
-            >Add Open AI Service Api Key</q-item-label
+          >Add Open AI Service Api Key
+          </q-item-label
           >
           <q-input
             ref="accessTokenRef"
@@ -357,27 +359,26 @@ const addOpenAIService = () => {
       </q-item>
     </q-list>
     <div class="col" style="margin-right: 50px; margin-left: 50px">
-      <div class="row q-gutter-sm">
+      <div class="row q-gutter-sm ">
         <q-btn
-          style="left: 228px; bottom: 13px; width: 218px; height: 17px"
+          color="transparent" outline
+          class="col text-weight-bolder q-px-sm full-width custom-btn"
+        >
+        </q-btn>
+        <q-separator vertical spaced color="transparent"></q-separator>
+        <q-btn
           :disable="userStore.isGithubEnabled"
           color="transparent"
           unelevated
           @click="alertAddGithubService"
           label="Add GitHub"
           text-color="black"
+          class="col text-weight-bolder q-px-sm full-width custom-btn"
           outline
         >
-          <q-img
-            style="left: 10px"
-            class="social_login"
-            src="~assets/images/ccmqufe334q6f4sus3b3tc9jm0.png"
-            width="30px"
-            alt="social-login-img"
-          />
         </q-btn>
       </div>
-      <q-separator vertical></q-separator>
+      <q-separator spaced></q-separator>
       <div class="row q-gutter-sm">
         <q-btn
           ref="resetBtn"
@@ -387,7 +388,7 @@ const addOpenAIService = () => {
           type="reset"
         >
         </q-btn>
-        <q-separator vertical spaced dark></q-separator>
+        <q-separator vertical spaced color="transparent"></q-separator>
         <q-btn
           class="col text-weight-bolder q-px-sm full-width custom-btn"
           label="Account Deletion"

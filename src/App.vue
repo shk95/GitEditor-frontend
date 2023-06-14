@@ -293,7 +293,7 @@ setTimeout(() => userStore.refreshToken(), 2000);
               <div
                 class="q-p"
                 style="
-                  width: 100%;
+                  width: 400px;
                   max-width: 400px;
                   margin-right: 9px;
                   margin-left: 9px;
