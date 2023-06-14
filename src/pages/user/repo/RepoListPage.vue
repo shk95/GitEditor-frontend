@@ -1,9 +1,11 @@
 <script setup>
-import { onBeforeMount, ref, watch } from "vue";
-import { api } from "boot/axios";
+import {onBeforeMount, reactive, ref, watch} from "vue";
+import {api} from "boot/axios";
+import {useQuasar} from "quasar";
+
+const $q = useQuasar();
 
 const splitterModel1 = ref(30);
-const splitterModel2 = ref(30);
 
 // 가져온 리포지토리 목록의 정보
 const repos = ref([
@@ -29,30 +31,57 @@ const defaultBranch = ref(null);
 // 선택된 브랜치
 const selectedBranch = ref(null);
 
+const unNestedFileTree = ref([]);
 // 가져온 리포지토리 파일 트리
 const fileTree = ref([]);
 // 선택된 파일 정보
-const selectedFile = ref({
-  /*mode, path, sha, type, url*/
+const shaOfSelectedFile = ref('' /*file`s sha*/);
+const selectedFile = reactive({
+  mode: '',
+  path: '',
+  sha: '',
+  type: '',
+  url: ''
+})
+const contentOfSelectedFile = reactive({
+  render: false,
+  textContent: "파일을 선택해주세요.",
+  url: "",
+  sha: ""
 });
 
+// 페이지 로딩시 리포지토리 목록 불러옴.
 onBeforeMount(() => {
-  // 페이지 로딩시 리포지토리 목록 불러옴.
   getRepos();
 });
 
+// 리포지토리 선택되면 리포지토리 정보 가져옴.
 watch(currentRepo, (selectedRepo) => {
-  // 리포지토리 선택되면 리포지토리 정보 가져옴.
   console.debug("Looking : ", selectedRepo);
   getRepo(selectedRepo);
 });
 
+// 리포지토리 정보중 브랜치가 선택되면 파일 목록을 가져옴.
 watch(selectedBranch, (selectedBranch) => {
-  // 리포지토리 정보중 브랜치가 선택되면 파일 목록을 가져옴.
   getFilesFromRoot(repo.value.repoName, selectedBranch);
 });
 
-watch(selectedFile, () => console.debug(selectedFile));
+// 파일 트리에서 파일 선택시 현재 파일의 sha 정보를 업데이트.
+watch(shaOfSelectedFile, () => {
+  const found = unNestedFileTree.value.find(f => f.sha === shaOfSelectedFile.value);
+  selectedFile.mode = found.mode;
+  selectedFile.path = found.path;
+  selectedFile.sha = found.sha;
+  selectedFile.type = found.type;
+  selectedFile.url = found.url;
+  console.log("Sha-1 of selected file.", shaOfSelectedFile.value)
+});
+
+// 선택된 파일의 sha 정보가 업데이트 되면 파일 내용을 가져옴.
+watch(selectedFile, () => {
+  console.log("Selected file.", selectedFile)
+  getFileContent()
+});
 
 const getRepos = () => {
   return api.get("/git/repos").then((resolve) => {
@@ -76,7 +105,7 @@ const getRepo = (selectedRepoName) => {
 const getFilesFromRoot = (repoName, branchName) => {
   // 루트 경로의 파일 목록 가져오기
   api
-    .get(`/git/repo/${repoName}`, {
+    .get(`/git/repo/${repoName}/tree`, {
       params: {
         branchName: `${encoding(branchName)}`,
       },
@@ -96,11 +125,13 @@ const getFilesFromRoot = (repoName, branchName) => {
         if (retrievedFile.type === "tree") file.lazy = true;
         return file;
       });
+      unNestedFileTree.value = fileTree.value;// 검색을위한 리스트
     })
-    .catch((error) => {});
+    .catch((error) => {
+    });
 };
 
-const getFilesFromTreeSha = ({ repoName, branchName, treeSha }) => {
+const getFilesFromTreeSha = ({repoName, branchName, treeSha}) => {
   return api
     .get(`/git/repo/${repoName}/tree`, {
       params: {
@@ -109,14 +140,52 @@ const getFilesFromTreeSha = ({ repoName, branchName, treeSha }) => {
       },
     })
     .then((resolve) => {
-      return { appendTree: resolve?.data };
+      return {appendTree: resolve?.data};
     })
     .catch((error) => {
       throw new Error("파일 목록가져오기 실패.");
     });
 };
 
-const onLazyLoad = ({ node, key, done, fail }) => {
+const getFileContent = () => {
+  if (selectedFile.mode !== "100644") {
+    contentOfSelectedFile.textContent = "이 파일은 렌더링 할 수 없습니다."
+    contentOfSelectedFile.sha = "";
+    contentOfSelectedFile.url = "";
+    contentOfSelectedFile.render = false
+    return;
+  }
+  api
+    .get(`/git/repo/${repo.value.repoName}/file/string`, {
+      params: {
+        branchName: `${encoding(selectedBranch.value)}`,
+        sha: `${selectedFile.sha}`,
+      },
+    })
+    .then((resolve) => {
+      console.log("Read file`s text content", resolve.data)
+      $q.notify({
+        color: "primary",
+        message: resolve.message,
+        icon: "check",
+      })
+      const file = resolve.data;
+      contentOfSelectedFile.textContent = file.textContent;
+      contentOfSelectedFile.sha = file.sha;
+      contentOfSelectedFile.url = file.url;
+      contentOfSelectedFile.render = true
+    })
+    .catch((error) => {
+      $q.notify({
+        color: "warning",
+        message: error.message,
+        icon: "report_problem",
+      })
+    });
+}
+
+// ##### 파일트리
+const onLazyLoad = ({node, key, done, fail}) => {
   // 파일트리 지연생성
   if (node.type !== "tree") {
     done([]);
@@ -127,21 +196,21 @@ const onLazyLoad = ({ node, key, done, fail }) => {
     branchName: selectedBranch.value,
     treeSha: node.sha,
   })
-    .then(({ appendTree }) => {
-      done(
-        appendTree.map((file) => {
-          const res = {
-            label: file.path,
-            sha: file.sha,
-            type: file.type,
-            mode: file.mode,
-            url: file.url,
-            icon: getTreeIcon(file.mode),
-          };
-          if (file.type === "tree") res.lazy = true;
-          return res;
-        })
-      );
+    .then(({appendTree}) => {
+      const newTree = appendTree.map((file) => {
+        const res = {
+          label: file.path,
+          sha: file.sha,
+          type: file.type,
+          mode: file.mode,
+          url: file.url,
+          icon: getTreeIcon(file.mode),
+        };
+        if (file.type === "tree") res.lazy = true;
+        return res;
+      })
+      unNestedFileTree.value.push(...newTree)// 검색용 리스트
+      done(newTree);
     })
     .catch((error) => {
       fail(error);
@@ -207,13 +276,13 @@ const encoding = (url) => encodeURIComponent(url);
           <div class="column" style="height: max-content">
             <q-tree
               :nodes="fileTree"
-              node-key="label"
+              node-key="sha"
+              label-key="label"
               dense
               duration="150"
               selected-color="primary"
-              v-model:selected="selectedFile"
+              v-model:selected="shaOfSelectedFile"
               @lazy-load="onLazyLoad"
-              default-expand-all
             />
           </div>
         </div>
@@ -233,17 +302,28 @@ const encoding = (url) => encodeURIComponent(url);
             :name="repo.repoName"
             :key="repo.repoName"
           >
-            <div class="text-h4 q-mb-md">{{ repo.repoFullName }}</div>
-            <p>{{ repo.htmlUrl }}</p>
-            <div class="q-pa-md">
-              <div class="q-gutter-x-md">
-                <q-select
-                  outlined
-                  dense
-                  v-model="selectedBranch"
-                  :options="branchNameList"
-                  label="Branch"
-                />
+            <div class="q-ma-lg-xl row">
+              <div class="col-5">
+                <div class="text-h4 q-mb-md">{{ repo.repoFullName }}</div>
+                <p>{{ repo.htmlUrl }}</p>
+              </div>
+              <div class="col-5">
+                <div class="q-gutter-x-md">
+                  <q-select
+                    style="width: 150px;"
+                    outlined
+                    dense
+                    v-model="selectedBranch"
+                    :options="branchNameList"
+                    label="Branch"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="q-pa-md">
+                <q-markdown :src="contentOfSelectedFile.textContent">
+                </q-markdown>
               </div>
             </div>
           </q-tab-panel>
