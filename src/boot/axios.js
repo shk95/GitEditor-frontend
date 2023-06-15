@@ -92,6 +92,9 @@ export default boot(({ app }) => {
         return res.data;
       }
       switch (true) {
+        case status >199 && status < 300:
+          return Promise.resolve(res.data);
+
         case status === 401:
           if (!require.reLogin) {
             require.reLogin = true;
@@ -104,7 +107,7 @@ export default boot(({ app }) => {
 
         case status === 500:
           // ElMessage({message: msg, type: 'error'})
-          return Promise.reject(new Error(msg));
+          return Promise.reject(res);
 
         case status === 601:
           // ElMessage({message: msg, type: 'warning'})
@@ -118,7 +121,7 @@ export default boot(({ app }) => {
           return Promise.reject("Unknown error");
 
         default:
-          return Promise.resolve(res.data);
+          return Promise.resolve(res);
       }
     },
     (error) => {

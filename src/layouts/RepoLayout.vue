@@ -19,13 +19,13 @@ const defineDrawerItems = [
     },
     iconName: "folder",
   },
-  {
+  /*{
     section: "Repo Edit",
     router: {
       path: "/user/repo/edit",
     },
     iconName: "edit",
-  },
+  },*/
 ];
 onMounted(() => {
   currentStore.setDrawerItems(defineDrawerItems);
