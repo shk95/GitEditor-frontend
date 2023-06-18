@@ -1,11 +1,11 @@
 <script setup>
-import {ref} from "vue";
-import {api} from "boot/axios";
+import { ref } from "vue";
+import { api } from "boot/axios";
 
 const email = ref(null);
 
 const changeEmail = (email) => {
-  const data = {defaultEmail: email};
+  const data = { defaultEmail: email };
   console.debug(data);
   return api.put("/user/email", data).then((resolve) => {
     console.debug(resolve);

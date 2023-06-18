@@ -1,15 +1,15 @@
 <script setup>
-import {useUserStore} from "stores/user";
-import {onBeforeUnmount, onMounted, ref} from "vue";
-import {useQuasar} from "quasar";
-import {api} from "boot/axios";
+import { useUserStore } from "stores/user";
+import { onBeforeUnmount, onMounted, ref } from "vue";
+import { useQuasar } from "quasar";
+import { api } from "boot/axios";
 
 const $q = useQuasar();
 const userStore = useUserStore();
 
 let profileImg = ref(null);
 let intervals = null;
-let progress = ref({loading: false, percentage: 0});
+let progress = ref({ loading: false, percentage: 0 });
 
 const isGithubEnabled = userStore.isGithubEnabled;
 const isOpenAIEnabled = userStore.isOpenAIEnabled;
@@ -40,7 +40,7 @@ const uploadImg = () => {
   api
     .post(
       "/user/profile/img",
-      {file: profileImg.value},
+      { file: profileImg.value },
       {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -72,15 +72,17 @@ const onRejected = (rejectedEntries) => {
   <div class="q-pa-md">
     <div class="row full-width text-h3 text-bold">Profile</div>
     <div class="row col-12 q-mt-md">
-      <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 q-pr-lg-md q-pr-md-md q-pr-sm-none q-pr-xs-none">
+      <div
+        class="col-lg-4 col-md-4 col-sm-12 col-xs-12 q-pr-lg-md q-pr-md-md q-pr-sm-none q-pr-xs-none"
+      >
         <q-card class="q-pa-md card-item flex flex-center">
           <div class="row full-width justify-center">
             <q-avatar size="150px">
-              <img :src="userStore.getUserImg"/>
+              <img :src="userStore.getUserImg" />
             </q-avatar>
           </div>
 
-          <q-separator/>
+          <q-separator />
 
           <div class="row q-my-md full-width justify-center">
             <div class="text-h5 row justify-center full-width text-bold">
@@ -89,15 +91,19 @@ const onRejected = (rejectedEntries) => {
             <!--            <div class="text-subtitle1 row justify-center full-width">
                           Full Stack Developer
                         </div>-->
-            <div class="row justify-center text-center full-width text-caption text-grey">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
-              dolore magna aliqua.
+            <div
+              class="row justify-center text-center full-width text-caption text-grey"
+            >
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+              eiusmod tempor incididunt ut labore et dolore magna aliqua.
             </div>
           </div>
         </q-card>
       </div>
       <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12">
-        <div class="row full-width q-pl-lg-xs q-pl-md-xs q-mt-lg-none q-mt-md-none q-mt-sm-md q-mt-xs-md">
+        <div
+          class="row full-width q-pl-lg-xs q-pl-md-xs q-mt-lg-none q-mt-md-none q-mt-sm-md q-mt-xs-md"
+        >
           <q-card class="q-pa-xs full-width">
             <q-card-section>
               <q-form class="q-mb-xs">
@@ -141,8 +147,7 @@ const onRejected = (rejectedEntries) => {
                     />
                   </div>
                 </div>
-                <div class="row-cols-1 q-mt-md" style="height: 153px;">
-                </div>
+                <div class="row-cols-1 q-mt-md" style="height: 153px"></div>
               </q-form>
             </q-card-section>
           </q-card>
@@ -153,7 +158,10 @@ const onRejected = (rejectedEntries) => {
     <div class="q-pa-md example-row-horizontal-alignment">
       <div class="row justify-center">
         <div>
-          <div class="q-pa-md q-gutter-sm row" style="position:relative; left: 35px;">
+          <div
+            class="q-pa-md q-gutter-sm row"
+            style="position: relative; left: 35px"
+          >
             <q-file
               color="purple-12"
               v-model="profileImg"
@@ -162,7 +170,7 @@ const onRejected = (rejectedEntries) => {
               @rejected="onRejected"
             >
               <template v-slot:prepend>
-                <q-icon name="attach_file"/>
+                <q-icon name="attach_file" />
               </template>
               <template v-slot:append>
                 <q-btn
@@ -191,7 +199,6 @@ const onRejected = (rejectedEntries) => {
               left-label
             />
           </div>
-
         </div>
       </div>
     </div>

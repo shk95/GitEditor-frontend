@@ -92,7 +92,7 @@ export default boot(({ app }) => {
         return res.data;
       }
       switch (true) {
-        case status >199 && status < 300:
+        case status > 199 && status < 300:
           return Promise.resolve(res.data);
 
         case status === 401:

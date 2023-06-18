@@ -1,14 +1,13 @@
 <script setup>
-import {computed, onBeforeMount, reactive, ref, watch} from "vue";
-import {api} from "boot/axios";
-import {useQuasar} from "quasar";
-import {useRouter} from "vue-router";
+import { computed, onBeforeMount, reactive, ref, watch } from "vue";
+import { api } from "boot/axios";
+import { useQuasar } from "quasar";
+import { useRouter } from "vue-router";
 
 const $q = useQuasar();
 const router = useRouter();
 
 const splitterModel1 = ref(18);
-
 
 // 가져온 리포지토리 목록의 정보
 const repos = ref([
@@ -20,8 +19,8 @@ onBeforeMount(() => {
     console.debug("Get Repos", resolve);
     repos.value = resolve?.data;
     currentRepo.value = resolve?.data[0]?.repoName;
-  })
-})
+  });
+});
 // 현재 보고있는 리포지토리 (패널)
 const currentRepo = ref(null);
 // 선택된 리포지토리 정보
@@ -31,7 +30,7 @@ const repo = reactive({
   htmlUrl: "",
   repoFullName: "",
   repoName: "",
-  url: ""
+  url: "",
 });
 // 리포지토리 선택되면 리포지토리 정보 가져옴.
 watch(currentRepo, (selectedRepo) => {
@@ -43,7 +42,6 @@ watch(currentRepo, (selectedRepo) => {
   selectedBranch.value = defaultBranch.value;
   console.log("get repo : ", repo.value.repoName);
 });
-
 
 // 선택된 리포지토리 브랜치 정보 목록
 const branchList = ref([
@@ -88,12 +86,10 @@ const getFilesFromRoot = (repoName, branchName) => {
         return file;
       });
     })
-    .catch((error) => {
-    });
+    .catch((error) => {});
 };
 // ##### 파일트리
-const onLazyLoad = ({node, key, done, fail}) => {
-
+const onLazyLoad = ({ node, key, done, fail }) => {
   // 파일트리 지연생성
   if (node.type !== "tree") {
     done([]);
@@ -104,7 +100,7 @@ const onLazyLoad = ({node, key, done, fail}) => {
     branchName: selectedBranch.value,
     treeSha: node.sha,
   })
-    .then(({appendTree}) => {
+    .then(({ appendTree }) => {
       const newTree = appendTree.map((file) => {
         const res = {
           label: file.path,
@@ -116,7 +112,7 @@ const onLazyLoad = ({node, key, done, fail}) => {
         };
         if (file.type === "tree") res.lazy = true;
         return res;
-      })
+      });
       // unNestedFileTree.value.push(...newTree)// 검색용 리스트
       done(newTree);
     })
@@ -125,7 +121,7 @@ const onLazyLoad = ({node, key, done, fail}) => {
       console.warn("Cannot getting files");
     });
 };
-const getFilesFromTreeSha = ({repoName, branchName, treeSha}) => {
+const getFilesFromTreeSha = ({ repoName, branchName, treeSha }) => {
   return api
     .get(`/git/repo/${repoName}/tree`, {
       params: {
@@ -134,56 +130,54 @@ const getFilesFromTreeSha = ({repoName, branchName, treeSha}) => {
       },
     })
     .then((resolve) => {
-      return {appendTree: resolve?.data};
+      return { appendTree: resolve?.data };
     })
     .catch((error) => {
       throw new Error("파일 목록가져오기 실패.");
     });
 };
 
-
 // 선택된 파일 정보
-const shaOfSelectedFile = ref('' /*file`s sha*/);
+const shaOfSelectedFile = ref("" /*file`s sha*/);
 const selectedFile = reactive({
-  label: '',
-  mode: '',
-  path: '',
-  sha: '',
-  type: '',
-  url: ''
-})
+  label: "",
+  mode: "",
+  path: "",
+  sha: "",
+  type: "",
+  url: "",
+});
 const contentOfSelectedFile = reactive({
   render: false,
   textContent: "파일을 선택해주세요.",
   url: "",
-  sha: ""
+  sha: "",
 });
 // 파일 트리에서 파일 선택시 현재 파일의 sha 정보를 업데이트.
-const treeRef = ref(null);// tree ref
+const treeRef = ref(null); // tree ref
 watch(shaOfSelectedFile, () => {
-  const file = treeRef.value.getNodeByKey(shaOfSelectedFile.value)
-  selectedFile.label = file.label
-  selectedFile.mode = file.mode
-  selectedFile.path = file.path
-  selectedFile.sha = file.sha
-  selectedFile.type = file.type
-  selectedFile.url = file.url
-  console.debug("selectedFile", selectedFile)
-  console.log("Sha-1 of selected file.", shaOfSelectedFile.value)
+  const file = treeRef.value.getNodeByKey(shaOfSelectedFile.value);
+  selectedFile.label = file.label;
+  selectedFile.mode = file.mode;
+  selectedFile.path = file.path;
+  selectedFile.sha = file.sha;
+  selectedFile.type = file.type;
+  selectedFile.url = file.url;
+  console.debug("selectedFile", selectedFile);
+  console.log("Sha-1 of selected file.", shaOfSelectedFile.value);
 });
-
 
 // 선택된 파일의 sha 정보가 업데이트 되면 파일 내용을 가져옴.
 watch(selectedFile, () => {
-  console.log("Selected file.", selectedFile)
-  getFileContent()
+  console.log("Selected file.", selectedFile);
+  getFileContent();
 });
 const getFileContent = () => {
   if (selectedFile.mode !== "100644") {
-    contentOfSelectedFile.textContent = "이 파일은 렌더링 할 수 없습니다."
+    contentOfSelectedFile.textContent = "이 파일은 렌더링 할 수 없습니다.";
     contentOfSelectedFile.sha = "";
     contentOfSelectedFile.url = "";
-    contentOfSelectedFile.render = false
+    contentOfSelectedFile.render = false;
     return;
   }
   api
@@ -194,58 +188,57 @@ const getFileContent = () => {
       },
     })
     .then((resolve) => {
-      console.log("Read file`s text content", resolve.data)
+      console.log("Read file`s text content", resolve.data);
       $q.notify({
         color: "primary",
         message: resolve.message,
         icon: "check",
-      })
+      });
       const file = resolve.data;
       contentOfSelectedFile.textContent = file.textContent;
       contentOfSelectedFile.sha = file.sha;
       contentOfSelectedFile.url = file.url;
-      contentOfSelectedFile.render = true
+      contentOfSelectedFile.render = true;
     })
     .catch((error) => {
       $q.notify({
         color: "warning",
         message: error.message,
         icon: "report_problem",
-      })
+      });
     });
-}
-
+};
 
 const createRepositoryForm = reactive({
   repoName: "",
   description: "",
   makePrivate: false,
-})
-const createRepositoryPrompt = ref(false)
+});
+const createRepositoryPrompt = ref(false);
 const goToEdit = () => {
   router.push({
     path: `/user/repo/${repo.value.repoName}/edit`,
-  })
-}
+  });
+};
 const newRepository = () => {
-  if (createRepositoryForm.repoName === '') {
+  if (createRepositoryForm.repoName === "") {
     $q.notify({
       type: "negative",
       message: "리포지토리 이름을 입력해주세요.",
     });
-    return
+    return;
   }
   api
     .post("/git/repo", createRepositoryForm)
-    .then(({message, data}) => {
+    .then(({ message, data }) => {
       $q.notify({
         type: "info",
         message: message,
       });
-      console.log("Create Repo", data.repoName)
+      console.log("Create Repo", data.repoName);
       return Promise.resolve(data.repoName);
     })
-    .then(resolve => {
+    .then((resolve) => {
       $q.dialog({
         title: "리포지토리 생성 완료",
         message: `${resolve} 리포지토리가 생성되었습니다.`,
@@ -255,11 +248,10 @@ const newRepository = () => {
       }).onOk(() => {
         router.push({
           path: `/user/repo/${resolve}/edit`,
-        })
-      })
-    })
-}
-
+        });
+      });
+    });
+};
 
 const getTreeIcon = (mode) => {
   // material icons
@@ -288,42 +280,42 @@ const getTreeIcon = (mode) => {
   return icons.find((i) => i.mode === mode)["name"];
 };
 
-import hljs from 'highlight.js';
-import 'highlight.js/styles/default.css';
-import prettier from 'prettier/standalone';
+import hljs from "highlight.js";
+import "highlight.js/styles/default.css";
+import prettier from "prettier/standalone";
 
-const isMarkdown = computed(() => selectedFile.path.endsWith('.md'))
+const isMarkdown = computed(() => selectedFile.path.endsWith(".md"));
 
 const code = computed(() => {
-    const text = contentOfSelectedFile.textContent
-    let formatted
-    try {
-      formatted = prettier.format(text, {
-        parser: 'babel',
-        plugins: [prettierPlugins],
-      });
-    } catch (e) {
-      formatted = text
-    }
-    return hljs.highlightAuto(formatted).value
+  const text = contentOfSelectedFile.textContent;
+  let formatted;
+  try {
+    formatted = prettier.format(text, {
+      parser: "babel",
+      plugins: [prettierPlugins],
+    });
+  } catch (e) {
+    formatted = text;
   }
-)
+  return hljs.highlightAuto(formatted).value;
+});
 
 const deleteRepo = () => {
-  api.delete('/git/repo', {
-    params: {
-      repoName: repo.value.repoName,
-    }
-  })
-    .then(({message}) => {
+  api
+    .delete("/git/repo", {
+      params: {
+        repoName: repo.value.repoName,
+      },
+    })
+    .then(({ message }) => {
       $q.notify({
         type: "info",
         message: message,
       });
-      updatePage()
-    })
-}
-const updatePage = () => setTimeout(() => router.go(0), 2000)
+      updatePage();
+    });
+};
+const updatePage = () => setTimeout(() => router.go(0), 2000);
 
 const encoding = (url) => encodeURIComponent(url);
 </script>
@@ -391,7 +383,7 @@ const encoding = (url) => encodeURIComponent(url);
               <div class="col-4">
                 <div class="q-gutter-x-md">
                   <q-select
-                    style="width: 150px;"
+                    style="width: 150px"
                     outlined
                     dense
                     v-model="selectedBranch"
@@ -405,7 +397,7 @@ const encoding = (url) => encodeURIComponent(url);
                   style="width: 178px"
                   label="New Repository"
                   outline
-                  @click="()=>createRepositoryPrompt=true"
+                  @click="() => (createRepositoryPrompt = true)"
                   push
                 ></q-btn>
                 <q-btn
@@ -425,7 +417,10 @@ const encoding = (url) => encodeURIComponent(url);
               </div>
             </div>
             <div class="row">
-              <q-markdown v-if="isMarkdown" :src="contentOfSelectedFile.textContent"></q-markdown>
+              <q-markdown
+                v-if="isMarkdown"
+                :src="contentOfSelectedFile.textContent"
+              ></q-markdown>
               <pre v-else v-html="code"></pre>
             </div>
           </q-tab-panel>
@@ -440,27 +435,30 @@ const encoding = (url) => encodeURIComponent(url);
           <div class="text-h6">Repository Name</div>
         </q-card-section>
         <q-card-section class="q-pt-none">
-          <q-input dense v-model="createRepositoryForm.repoName" autofocus/>
+          <q-input dense v-model="createRepositoryForm.repoName" autofocus />
         </q-card-section>
 
         <q-card-section>
           <div class="text-h6">Repository Description</div>
         </q-card-section>
         <q-card-section class="q-pt-none">
-          <q-input dense v-model="createRepositoryForm.description"/>
+          <q-input dense v-model="createRepositoryForm.description" />
         </q-card-section>
 
         <q-card-section>
           <div class="text-h6">Make Repository Private?</div>
         </q-card-section>
         <q-card-section class="q-pt-none">
-          <q-toggle :label="createRepositoryForm.makePrivate?'true':'false'" dense
-                    v-model="createRepositoryForm.makePrivate"/>
+          <q-toggle
+            :label="createRepositoryForm.makePrivate ? 'true' : 'false'"
+            dense
+            v-model="createRepositoryForm.makePrivate"
+          />
         </q-card-section>
 
         <q-card-actions align="right" class="text-primary">
-          <q-btn flat label="Cancel" v-close-popup/>
-          <q-btn flat label="Create" v-close-popup @click="newRepository"/>
+          <q-btn flat label="Cancel" v-close-popup />
+          <q-btn flat label="Create" v-close-popup @click="newRepository" />
         </q-card-actions>
       </q-card>
     </q-dialog>
