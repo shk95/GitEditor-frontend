@@ -1,7 +1,7 @@
 <script setup>
-import {ref} from "vue";
-import {api} from "boot/axios";
-import {useQuasar} from "quasar";
+import { ref } from "vue";
+import { api } from "boot/axios";
+import { useQuasar } from "quasar";
 
 const $q = useQuasar();
 
@@ -10,7 +10,7 @@ const disableBtn = ref(false);
 
 const changeEmail = (email) => {
   disableBtn.value = true;
-  const data = {defaultEmail: email};
+  const data = { defaultEmail: email };
   console.debug(data);
   return api
     .post("/user/password", data)
