@@ -76,7 +76,7 @@ const routes = [
             },
           },
           {
-            path: "edit",
+            path: ":repoName/edit",
             component: () => import("pages/user/repo/RepoEditPage.vue"),
             meta: {
               requiresAuth: true,

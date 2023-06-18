@@ -36,20 +36,18 @@ const changeEmailHandler = () => {
     <div>
       <h5 class="text-center text-h">Find Password</h5>
     </div>
-    <div class="q-gutter-y-md" style="max-width: 500px">
-      <div class="row" style="text-align: center">
-        <div class="row-cols-auto" style="text-align: center"></div>
-        <div class="q-pl-lg q-pr-md col-8">
-          <q-input label="Input Email" v-model="email" :dense="false" />
-        </div>
-        <div class="q-pl-md q-pr-md col-4">
-          <q-btn
-            color="primary"
-            icon-right="send"
-            @click="changeEmailHandler"
-            :disable="disableBtn"
-          />
-        </div>
+    <div class="row q-gutter-y-md justify-center" style="max-width: 500px">
+      <div class="q-pl-lg q-pr-md col">
+        <q-input label="Input Email" v-model="email" :dense="false">
+          <template v-slot:append>
+            <q-btn
+              color="primary"
+              icon-right="send"
+              @click="changeEmailHandler"
+              :disable="disableBtn"
+            />
+          </template>
+        </q-input>
       </div>
     </div>
   </div>

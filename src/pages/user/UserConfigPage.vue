@@ -328,8 +328,8 @@ const addOpenAIService = () => {
       <q-item>
         <q-item-section>
           <q-item-label class="q-pb-xs"
-            >Add Open AI Service Api Key</q-item-label
-          >
+            >Add Open AI Service Api Key
+          </q-item-label>
           <q-input
             ref="accessTokenRef"
             v-model="form.accessToken"
@@ -359,25 +359,25 @@ const addOpenAIService = () => {
     <div class="col" style="margin-right: 50px; margin-left: 50px">
       <div class="row q-gutter-sm">
         <q-btn
-          style="left: 228px; bottom: 13px; width: 218px; height: 17px"
+          color="transparent"
+          outline
+          class="col text-weight-bolder q-px-sm full-width custom-btn"
+        >
+        </q-btn>
+        <q-separator vertical spaced color="transparent"></q-separator>
+        <q-btn
           :disable="userStore.isGithubEnabled"
           color="transparent"
           unelevated
           @click="alertAddGithubService"
           label="Add GitHub"
           text-color="black"
+          class="col text-weight-bolder q-px-sm full-width custom-btn"
           outline
         >
-          <q-img
-            style="left: 10px"
-            class="social_login"
-            src="~assets/images/ccmqufe334q6f4sus3b3tc9jm0.png"
-            width="30px"
-            alt="social-login-img"
-          />
         </q-btn>
       </div>
-      <q-separator vertical></q-separator>
+      <q-separator spaced></q-separator>
       <div class="row q-gutter-sm">
         <q-btn
           ref="resetBtn"
@@ -387,7 +387,7 @@ const addOpenAIService = () => {
           type="reset"
         >
         </q-btn>
-        <q-separator vertical spaced dark></q-separator>
+        <q-separator vertical spaced color="transparent"></q-separator>
         <q-btn
           class="col text-weight-bolder q-px-sm full-width custom-btn"
           label="Account Deletion"

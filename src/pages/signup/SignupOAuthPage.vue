@@ -29,23 +29,26 @@ const onSubmit = () => {
   disableBtn.value = true;
   api
     .post("/auth/signup/oauth", formData)
-    .then((data) => {
-      console.debug(
-        "signup ok\nmessage : " + data?.message + "\nstatus : " + data?.status
-      );
-      $q.notify({
-        position: "top",
-        type: "info",
-        message: "회원가입되었습니다.",
-      });
-      router.push({ name: "redirect" });
-    },reject=>{
-      $q.notify({
-        position: "top",
-        type: "warning",
-        message: reject?.message,
-      });
-    })
+    .then(
+      (data) => {
+        console.debug(
+          "signup ok\nmessage : " + data?.message + "\nstatus : " + data?.status
+        );
+        $q.notify({
+          position: "top",
+          type: "info",
+          message: "회원가입되었습니다.",
+        });
+        router.push({ name: "redirect" });
+      },
+      (reject) => {
+        $q.notify({
+          position: "top",
+          type: "warning",
+          message: reject?.message,
+        });
+      }
+    )
     .catch((error) => {
       $q.notify({
         position: "top",
@@ -66,7 +69,7 @@ const onReset = () => {
     class="col-lg-6 col-md-6 col-sm-12 col-xs-12 q-px-xl"
     style="margin-left: 250px; margin-right: 250px; margin-top: 100px"
   >
-    <h4 class="text-center" style="position: relative; right:18px;">Signup</h4>
+    <h4 class="text-center" style="position: relative; right: 15px">Signup</h4>
     <q-form class="q-gutter-md" @submit="onSubmit" @reset="onReset">
       <q-list>
         <q-item>
@@ -96,18 +99,21 @@ const onReset = () => {
           </q-item-section>
         </q-item>
       </q-list>
-      <div class="col" style="margin-right: 50px; margin-left: 50px">
+      <div
+        class="row q-gutter-sm"
+        style="margin-right: 50px; margin-left: 50px"
+      >
         <q-btn
-          class="text-weight-bolder q-px-xl full-width custom-btn"
+          class="col text-weight-bolder q-px-sm full-width custom-btn"
           label="Signup"
           no-caps
           type="submit"
           :disable="disableBtn"
         >
         </q-btn>
-        <q-separator color="transparent"></q-separator>
+        <q-separator vertical spaced color="transparent"></q-separator>
         <q-btn
-          class="text-weight-bolder q-px-xl full-width custom-btn"
+          class="col text-weight-bolder q-px-sm full-width custom-btn"
           label="Reset"
           no-caps
           type="reset"
