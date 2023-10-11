@@ -13,7 +13,7 @@ const changeEmail = (email) => {
   const data = { defaultEmail: email };
   console.debug(data);
   return api
-    .post("/user/password", data)
+    .post("/user/profile/password", data)
     .then((resolve) => {
       console.debug(resolve);
       $q.notify({

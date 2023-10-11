@@ -12,7 +12,7 @@ const router = useRouter();
 
 const redirectType = Object.freeze({
   emailVerification: {
-    url: "user/email",
+    url: "user/profile/email",
     method: "get",
     param: "code",
     self: false,

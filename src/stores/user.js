@@ -1,5 +1,5 @@
-import { defineStore } from "pinia";
-import { api } from "boot/axios";
+import {defineStore} from "pinia";
+import {api} from "boot/axios";
 
 export const useUserStore = defineStore("user", {
   state: () => ({
@@ -9,10 +9,12 @@ export const useUserStore = defineStore("user", {
     defaultEmail: null,
     defaultUsername: null,
     defaultImgUrl: null,
+
     providerEmail: null,
     providerLoginId: null,
     providerUsername: null,
     providerImgUrl: null,
+
     accessToken: null,
     refreshTokenTimeout: null,
     githubEnabled: false,
@@ -53,8 +55,8 @@ export const useUserStore = defineStore("user", {
       this.accessToken = token;
     },
     me() {
-      return api.get("/user/me").then((response) => {
-        console.debug("/user/me response : ", response);
+      return api.get("/user/profile").then((response) => {
+        console.debug("/user/profile response : ", response);
         console.log(response?.message, response.data);
         this.saveUser(response.data).then(() => console.log("User saved."));
       });
@@ -87,11 +89,11 @@ export const useUserStore = defineStore("user", {
       this.accessToken = null;
       this.refreshTokenTimeout = null;
       this.githubEnabled = false;
-      this.openAiEnabled = false;
+      this.openAIEnabled = false;
     },
     login(data) {
       return api.post("/auth/login", data).then(
-        ({ data, message }) => {
+        ({data, message}) => {
           console.debug("login data : ", data);
           this.accessToken = data?.accessToken;
           if (!this.accessToken) {
@@ -100,12 +102,12 @@ export const useUserStore = defineStore("user", {
           console.log(this.accessToken);
           return this.me().then((r) => {
             this.startRefreshTokenTimer();
-            return Promise.resolve({ message });
+            return Promise.resolve({message});
           });
         },
         (reject) => {
-          console.debug("login error in user store", reject);
-          return Promise.reject("로그인 실패");
+          console.debug("login failed in user store", reject);
+          return Promise.reject(reject.data.message);
         }
       );
     },

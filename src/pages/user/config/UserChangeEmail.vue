@@ -7,7 +7,7 @@ const email = ref(null);
 const changeEmail = (email) => {
   const data = { defaultEmail: email };
   console.debug(data);
-  return api.put("/user/email", data).then((resolve) => {
+  return api.put("/user/profile/email", data).then((resolve) => {
     console.debug(resolve);
   });
 };
