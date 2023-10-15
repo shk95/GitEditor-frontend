@@ -9,16 +9,10 @@ const $q = useQuasar();
 const router = useRouter();
 
 const formData = reactive({
-  userId: "",
   username: "",
 });
 const disableBtn = ref(false);
 
-const userIdRule = [
-  (userId) =>
-    (userId && formRegx.userId["pattern"].test(userId)) ||
-    formRegx.userId["message"],
-];
 const nameRule = [
   (name) =>
     (name && formRegx.username["pattern"].test(name)) ||
@@ -28,7 +22,7 @@ const nameRule = [
 const onSubmit = () => {
   disableBtn.value = true;
   api
-    .post("/auth/signup/oauth", formData)
+    .post("/user/signup/oauth", formData)
     .then(
       (data) => {
         console.debug(
@@ -72,19 +66,6 @@ const onReset = () => {
     <h4 class="text-center" style="position: relative; right: 15px">Signup</h4>
     <q-form class="q-gutter-md" @submit="onSubmit" @reset="onReset">
       <q-list>
-        <q-item>
-          <q-item-section>
-            <q-item-label class="q-pb-xs">Id</q-item-label>
-            <q-input
-              v-model="formData.userId"
-              class="full-width"
-              dense
-              lazy-rules
-              :rules="userIdRule"
-              type="text"
-            />
-          </q-item-section>
-        </q-item>
         <q-item>
           <q-item-section>
             <q-item-label class="q-pb-xs">Name</q-item-label>

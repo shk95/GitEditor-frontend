@@ -1,6 +1,6 @@
-import { boot } from "quasar/wrappers";
+import {boot} from "quasar/wrappers";
 import axios from "axios";
-import { useUserStore } from "stores/user";
+import {useUserStore} from "stores/user";
 
 // Be careful when using SSR for cross-request state pollution
 // due to creating a Singleton instance here;
@@ -11,10 +11,10 @@ import { useUserStore } from "stores/user";
 const api = axios.create({
   baseURL: `${import.meta.env.VITE_SERVER_API_URL}`,
   withCredentials: true,
-  headers: { "Content-Type": "application/json" },
+  headers: {"Content-Type": "application/json"},
 });
 
-export default boot(({ app }) => {
+export default boot(({app}) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
   // app.config.globalProperties.$axios = axios
   // ^ ^ ^ this will allow you to use this.$axios (for Vue Options API form)
@@ -92,36 +92,42 @@ export default boot(({ app }) => {
         return res.data;
       }
       switch (true) {
-        case status > 199 && status < 300:
+        case 199 < status && status < 300:
+          console.debug("resolved" + res.data.message)
           return Promise.resolve(res.data);
 
-        case status === 401:
-          if (!require.reLogin) {
-            require.reLogin = true;
+        case 299 < status && status < 400:
+          console.log("redirect")
+          return Promise.resolve(res);
+
+        case 399 < status && status < 500:
+          console.log("rejected")
+          switch (true) {
+            case status === 400:
+              return Promise.reject(res)
+            case status === 401:
+              if (!require.reLogin) {
+                require.reLogin = true;
+              }
+              return Promise.reject(() => {
+                new Error("로그인 세션 만료");
+                return res.data;
+              });
+            default:
+              return Promise.reject(res)
           }
 
-          return Promise.reject(() => {
-            new Error("로그인 세션 만료");
-            return res.data;
-          });
-
-        case status === 500:
-          // ElMessage({message: msg, type: 'error'})
+        case 499 < status && status < 600:
           return Promise.reject(res);
 
-        case status === 601:
-          // ElMessage({message: msg, type: 'warning'})
+        case 599 < status:
           return Promise.reject(() => {
             new Error(msg);
             return res.data;
           });
 
-        case status !== 200:
-          // ElNotification.error({title: msg})
-          return Promise.reject("Unknown error");
-
         default:
-          return Promise.resolve(res);
+          return Promise.reject("Unknown error");
       }
     },
     (error) => {
@@ -158,5 +164,5 @@ export default boot(({ app }) => {
     })
 }*/
 
-export let require = { reLogin: false };
-export { api };
+export let require = {reLogin: false};
+export {api};

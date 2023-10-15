@@ -42,7 +42,7 @@ const nameRule = [
 const onSubmit = () => {
   disableBtn.value = true;
   api
-    .post("/auth/signup", formData)
+    .post("/user/signup", formData)
     .then((data) => {
       console.debug(
         "signup ok\nmessage : " + data?.message + "\nstatus : " + data?.status
