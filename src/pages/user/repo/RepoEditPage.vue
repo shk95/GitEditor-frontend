@@ -1,8 +1,8 @@
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { api } from "boot/axios";
-import { useQuasar } from "quasar";
+import {computed, onMounted, reactive, ref, watch} from "vue";
+import {useRoute, useRouter} from "vue-router";
+import {api} from "boot/axios";
+import {useQuasar} from "quasar";
 
 const route = useRoute();
 const router = useRouter();
@@ -31,7 +31,7 @@ const getMarkdown = () => {
       basePath: selectedFile.path,
       baseTreeSha: selectedFile.sha,
     })
-    .then(({ data, message }) => {
+    .then(({data, message}) => {
       console.log("#### data", data);
       console.log("#### message", message);
       $q.notify({
@@ -58,7 +58,7 @@ onMounted(() => {
         type: "negative",
         message: "리포지토리가 존재하지 않습니다.",
       });
-      router.push({ path: "/user/repo" });
+      router.push({path: "/user/repo"});
     });
 });
 
@@ -81,7 +81,7 @@ const getRepo = () => {
       },
     })
     .then(
-      ({ data, message }) => {
+      ({data, message}) => {
         $q.notify({
           color: "primary",
           message: message,
@@ -96,7 +96,7 @@ const getRepo = () => {
         repo.defaultBranch = data.defaultBranch;
         repo.owner = data.owner;
       },
-      ({ message }) => {
+      ({message}) => {
         return Promise.reject(new Error(message));
       }
     );
@@ -148,9 +148,10 @@ watch(selectedFile, () => {
 const getFilesFromRoot = (repoName, branchName) => {
   // 루트 경로의 파일 목록 가져오기
   api
-    .get(`/git/repo/${repoName}/tree`, {
+    .get(`/git/repo/tree`, {
       params: {
         branchName: `${encoding(branchName)}`,
+        repoName: `${repoName}`
       },
     })
     .then((resolve) => {
@@ -170,19 +171,21 @@ const getFilesFromRoot = (repoName, branchName) => {
         return file;
       });
     })
-    .catch((error) => {});
+    .catch((error) => {
+    });
 };
 
-const getFilesFromTreeSha = ({ repoName, branchName, treeSha }) => {
+const getFilesFromTreeSha = ({repoName, branchName, treeSha}) => {
   return api
-    .get(`/git/repo/${repoName}/tree`, {
+    .get(`/git/repo/tree`, {
       params: {
         branchName: `${encoding(branchName)}`,
         treeSha: `${treeSha}`,
+        repoName: `${repoName}`
       },
     })
     .then((resolve) => {
-      return { appendTree: resolve?.data };
+      return {appendTree: resolve?.data};
     })
     .catch((error) => {
       throw new Error("파일 목록가져오기 실패.");
@@ -198,10 +201,11 @@ const getFileContent = () => {
     return;
   }
   api
-    .get(`/git/repo/${repoName.value}/file/string`, {
+    .get(`/git/repo/file/string`, {
       params: {
         branchName: `${encoding(selectedBranch.value)}`,
         sha: `${selectedFile.sha}`,
+        repoName: `${repoName.value}`
       },
     })
     .then((resolve) => {
@@ -226,7 +230,7 @@ const getFileContent = () => {
     });
 };
 
-const onLazyLoad = ({ node, key, done, fail }) => {
+const onLazyLoad = ({node, key, done, fail}) => {
   // 파일트리 지연생성
   if (node.type !== "tree") {
     done([]);
@@ -237,7 +241,7 @@ const onLazyLoad = ({ node, key, done, fail }) => {
     branchName: selectedBranch.value,
     treeSha: node.sha,
   })
-    .then(({ appendTree }) => {
+    .then(({appendTree}) => {
       const newTree = appendTree.map((file) => {
         const res = {
           label: file.path,
@@ -330,7 +334,8 @@ const code = computed(() => {
 
 const updatePage = () => setTimeout(() => router.go(0), 1000);
 
-const isUpdate = () => {};
+const isUpdate = () => {
+};
 const updateFile = () => {
   const document = {
     content: contentOfSelectedFile.textContent,
@@ -338,7 +343,7 @@ const updateFile = () => {
     branchName: selectedBranch.value,
     path: selectedFile.path,
   };
-  api.put("/document", document).then(({ message, data }) => {
+  api.put("/document", document).then(({message, data}) => {
     $q.notify({
       color: "primary",
       message: message,
@@ -385,7 +390,7 @@ const saveNew = () => {
     filename: newName.value,
     extension: "md",
   };
-  api.post("/document", document).then(({ message, data }) => {
+  api.post("/document", document).then(({message, data}) => {
     $q.notify({
       color: "primary",
       message: message,
@@ -404,7 +409,7 @@ const createBranch = () => {
     newBranchName: newBranchName.value,
     repoName: repo.repoName,
   };
-  api.post("/git/branch", data).then(({ message, data }) => {
+  api.post("/git/branch", data).then(({message, data}) => {
     $q.notify({
       color: "primary",
       message: message,
@@ -419,7 +424,7 @@ const deleteBranch = () => {
     branchName: selectedBranch.value,
     repoName: repo.repoName,
   };
-  api.delete("/git/branch", { data }).then(({ message, data }) => {
+  api.delete("/git/branch", {data}).then(({message, data}) => {
     $q.notify({
       color: "primary",
       message: message,
@@ -610,12 +615,12 @@ const deleteBranch = () => {
       </q-card-section>
 
       <q-card-section class="q-pt-none">
-        <q-input dense v-model="newBranchName" autofocus />
+        <q-input dense v-model="newBranchName" autofocus/>
       </q-card-section>
 
       <q-card-actions align="right" class="text-primary">
-        <q-btn flat label="Ok" v-close-popup />
-        <q-btn flat label="Submit" @click="createBranch" />
+        <q-btn flat label="Ok" v-close-popup/>
+        <q-btn flat label="Submit" @click="createBranch"/>
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -627,19 +632,19 @@ const deleteBranch = () => {
       </q-card-section>
 
       <q-card-section class="q-pt-none">
-        <q-input dense v-model="address" autofocus />
+        <q-input dense v-model="address" autofocus/>
       </q-card-section>
       <q-card-section>
         <div class="text-h6">File Name</div>
       </q-card-section>
 
       <q-card-section class="q-pt-none">
-        <q-input dense v-model="name" autofocus />
+        <q-input dense v-model="name" autofocus/>
       </q-card-section>
 
       <q-card-actions align="right" class="text-primary">
-        <q-btn flat label="Ok" v-close-popup />
-        <q-btn flat label="Submit" @click="getMarkdown" />
+        <q-btn flat label="Ok" v-close-popup/>
+        <q-btn flat label="Submit" @click="getMarkdown"/>
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -651,19 +656,19 @@ const deleteBranch = () => {
       </q-card-section>
 
       <q-card-section class="q-pt-none">
-        <q-input dense v-model="newPath" autofocus />
+        <q-input dense v-model="newPath" autofocus/>
       </q-card-section>
       <q-card-section>
         <div class="text-h6">File Name</div>
       </q-card-section>
 
       <q-card-section class="q-pt-none">
-        <q-input dense v-model="newName" autofocus />
+        <q-input dense v-model="newName" autofocus/>
       </q-card-section>
 
       <q-card-actions align="right" class="text-primary">
-        <q-btn flat label="Cancel" v-close-popup />
-        <q-btn flat label="Submit" @click="saveNew" />
+        <q-btn flat label="Cancel" v-close-popup/>
+        <q-btn flat label="Submit" @click="saveNew"/>
       </q-card-actions>
     </q-card>
   </q-dialog>
