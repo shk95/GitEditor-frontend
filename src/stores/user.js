@@ -1,5 +1,5 @@
-import {defineStore} from "pinia";
-import {api} from "boot/axios";
+import { defineStore } from "pinia";
+import { api } from "boot/axios";
 
 export const useUserStore = defineStore("user", {
   state: () => ({
@@ -48,6 +48,9 @@ export const useUserStore = defineStore("user", {
     isOpenAIEnabled(state) {
       return state.openAIEnabled;
     },
+    getProviderTypeAndLoginId(state) {
+      return `${state.providerType},${state.userId}`;
+    },
   },
   persist: true,
   actions: {
@@ -93,7 +96,7 @@ export const useUserStore = defineStore("user", {
     },
     login(data) {
       return api.post("/auth/login", data).then(
-        ({data, message}) => {
+        ({ data, message }) => {
           console.debug("login data : ", data);
           this.accessToken = data?.accessToken;
           if (!this.accessToken) {
@@ -102,7 +105,7 @@ export const useUserStore = defineStore("user", {
           console.log(this.accessToken);
           return this.me().then((r) => {
             this.startRefreshTokenTimer();
-            return Promise.resolve({message});
+            return Promise.resolve({ message });
           });
         },
         (reject) => {

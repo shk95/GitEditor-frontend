@@ -1,8 +1,8 @@
 <script setup>
-import {computed, onBeforeMount, reactive, ref, watch} from "vue";
-import {api} from "boot/axios";
-import {useQuasar} from "quasar";
-import {useRouter} from "vue-router";
+import { computed, onBeforeMount, reactive, ref, watch } from "vue";
+import { api } from "boot/axios";
+import { useQuasar } from "quasar";
+import { useRouter } from "vue-router";
 
 const $q = useQuasar();
 const router = useRouter();
@@ -68,7 +68,7 @@ const getFilesFromRoot = (repoName, branchName) => {
     .get(`/git/repo/tree`, {
       params: {
         branchName: `${encoding(branchName)}`,
-        repoName: `${repoName}`
+        repoName: `${repoName}`,
       },
     })
     .then((resolve) => {
@@ -87,11 +87,10 @@ const getFilesFromRoot = (repoName, branchName) => {
         return file;
       });
     })
-    .catch((error) => {
-    });
+    .catch((error) => {});
 };
 // ##### 파일트리
-const onLazyLoad = ({node, key, done, fail}) => {
+const onLazyLoad = ({ node, key, done, fail }) => {
   // 파일트리 지연생성
   if (node.type !== "tree") {
     done([]);
@@ -102,7 +101,7 @@ const onLazyLoad = ({node, key, done, fail}) => {
     branchName: selectedBranch.value,
     treeSha: node.sha,
   })
-    .then(({appendTree}) => {
+    .then(({ appendTree }) => {
       const newTree = appendTree.map((file) => {
         const res = {
           label: file.path,
@@ -123,17 +122,17 @@ const onLazyLoad = ({node, key, done, fail}) => {
       console.warn("Cannot getting files");
     });
 };
-const getFilesFromTreeSha = ({repoName, branchName, treeSha}) => {
+const getFilesFromTreeSha = ({ repoName, branchName, treeSha }) => {
   return api
     .get(`/git/repo/tree`, {
       params: {
         branchName: `${encoding(branchName)}`,
         treeSha: `${treeSha}`,
-        repoName: `${repoName}`
+        repoName: `${repoName}`,
       },
     })
     .then((resolve) => {
-      return {appendTree: resolve?.data};
+      return { appendTree: resolve?.data };
     })
     .catch((error) => {
       throw new Error("파일 목록가져오기 실패.");
@@ -188,7 +187,7 @@ const getFileContent = () => {
       params: {
         branchName: `${encoding(selectedBranch.value)}`,
         sha: `${selectedFile.sha}`,
-        repoName: `${repo.value.repoName}`
+        repoName: `${repo.value.repoName}`,
       },
     })
     .then((resolve) => {
@@ -234,7 +233,7 @@ const newRepository = () => {
   }
   api
     .post("/git/repo", createRepositoryForm)
-    .then(({message, data}) => {
+    .then(({ message, data }) => {
       $q.notify({
         type: "info",
         message: message,
@@ -311,7 +310,7 @@ const deleteRepo = () => {
         repoName: repo.value.repoName,
       },
     })
-    .then(({message}) => {
+    .then(({ message }) => {
       $q.notify({
         type: "info",
         message: message,
@@ -439,14 +438,14 @@ const encoding = (url) => encodeURIComponent(url);
           <div class="text-h6">Repository Name</div>
         </q-card-section>
         <q-card-section class="q-pt-none">
-          <q-input dense v-model="createRepositoryForm.repoName" autofocus/>
+          <q-input dense v-model="createRepositoryForm.repoName" autofocus />
         </q-card-section>
 
         <q-card-section>
           <div class="text-h6">Repository Description</div>
         </q-card-section>
         <q-card-section class="q-pt-none">
-          <q-input dense v-model="createRepositoryForm.description"/>
+          <q-input dense v-model="createRepositoryForm.description" />
         </q-card-section>
 
         <q-card-section>
@@ -461,8 +460,8 @@ const encoding = (url) => encodeURIComponent(url);
         </q-card-section>
 
         <q-card-actions align="right" class="text-primary">
-          <q-btn flat label="Cancel" v-close-popup/>
-          <q-btn flat label="Create" v-close-popup @click="newRepository"/>
+          <q-btn flat label="Cancel" v-close-popup />
+          <q-btn flat label="Create" v-close-popup @click="newRepository" />
         </q-card-actions>
       </q-card>
     </q-dialog>

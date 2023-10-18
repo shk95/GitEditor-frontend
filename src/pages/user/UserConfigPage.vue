@@ -1,10 +1,10 @@
 <script setup>
-import {api} from "boot/axios";
-import {onMounted, reactive, ref, toRef} from "vue";
-import {formRegx} from "src/utils/form-regx";
-import {useQuasar} from "quasar";
-import {useRouter} from "vue-router";
-import {useUserStore} from "stores/user";
+import { api } from "boot/axios";
+import { onMounted, reactive, ref, toRef } from "vue";
+import { formRegx } from "src/utils/form-regx";
+import { useQuasar } from "quasar";
+import { useRouter } from "vue-router";
+import { useUserStore } from "stores/user";
 import socials from "src/utils/socials";
 
 const $q = useQuasar();
@@ -62,18 +62,18 @@ const rules = {
 
 const submitEmail = () => {
   emailRef.value.validate()
-    ? updateUser({newEmail: form.email})
+    ? updateUser({ newEmail: form.email })
     : formAlert();
 };
 
 const submitUsername = () => {
   usernameRef.value.validate()
-    ? updateUser({newUsername: form.username})
+    ? updateUser({ newUsername: form.username })
     : formAlert();
 };
 const submitPassword = () => {
   passwordRef.value.validate()
-    ? updateUser({newPassword: form.password})
+    ? updateUser({ newPassword: form.password })
     : formAlert();
 };
 
@@ -140,7 +140,7 @@ const accountDeletion = () => {
         type: "info",
         message: resolve?.message,
       });
-      router.push({name: "home"});
+      router.push({ name: "home" });
     })
     .catch((error) => {
       $q.notify({
@@ -187,8 +187,7 @@ const addGithubService = () => {
         return new Error(reject?.message);
       }
     )
-    .catch((error) => {
-    });
+    .catch((error) => {});
 };
 
 const alertAddOpenAIService = () => {
@@ -216,7 +215,7 @@ const addOpenAIService = () => {
   if (!accessTokenRef.value.validate()) {
     return;
   }
-  const data = {accessToken: form.accessToken};
+  const data = { accessToken: form.accessToken };
   return api.post("/user/profile/openai", data).then((resolve) => {
     $q.notify({
       position: "top",
@@ -227,23 +226,23 @@ const addOpenAIService = () => {
 };
 
 // section discord
-const registeredDiscordId = ref("")
+const registeredDiscordId = ref("");
 onMounted(() => {
-  api.get('/user/profile/discord')
-    .then(data => {
-      registeredDiscordId.value = data.data
-    })
-})
-const discordIdInput = ref("")
+  api.get("/user/profile/discord").then((data) => {
+    registeredDiscordId.value = data.data;
+  });
+});
+const discordIdInput = ref("");
 const addDiscordId = () => {
-  api.post("user/profile/discord", {
-    discordId: discordIdInput.value
-  })
-    .then(resolve => {
-      console.debug(resolve)
-      discordIdInput.value = ""
+  api
+    .post("user/profile/discord", {
+      discordId: discordIdInput.value,
     })
-}
+    .then((resolve) => {
+      console.debug(resolve);
+      discordIdInput.value = "";
+    });
+};
 const alertAddDiscordId = () => {
   $q.dialog({
     // title: "Chat GPT 연동",
@@ -252,10 +251,8 @@ const alertAddDiscordId = () => {
     persistent: true,
   })
     .onOk(() => addDiscordId())
-    .onCancel(() => {
-    });
+    .onCancel(() => {});
 };
-
 </script>
 
 <template>
@@ -307,7 +304,7 @@ const alertAddDiscordId = () => {
             :rules="rules.username"
           >
             <template v-slot:append>
-              <q-btn round dense flat icon="send" @click="submitUsername"/>
+              <q-btn round dense flat icon="send" @click="submitUsername" />
             </template>
           </q-input>
         </q-item-section>
@@ -360,7 +357,7 @@ const alertAddDiscordId = () => {
       <q-item>
         <q-item-section>
           <q-item-label class="q-pb-xs"
-          >Add Open AI Service Api Key
+            >Add Open AI Service Api Key
           </q-item-label>
           <q-input
             ref="accessTokenRef"
@@ -389,9 +386,7 @@ const alertAddDiscordId = () => {
       </q-item>
       <q-item>
         <q-item-section>
-          <q-item-label class="q-pb-xs"
-          >Add Discord Id
-          </q-item-label>
+          <q-item-label class="q-pb-xs">Add Discord Id </q-item-label>
           <q-input
             ref="discordIdRef"
             v-model="discordIdInput"

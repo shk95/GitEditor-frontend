@@ -1,5 +1,5 @@
 <script setup>
-import { onBeforeMount, ref } from "vue";
+import { onBeforeMount, onMounted, reactive, ref } from "vue";
 import { RouterView } from "vue-router";
 import { useCurrentStore } from "stores/current";
 import { useUserStore } from "stores/user";
@@ -151,6 +151,150 @@ const moveFab = (ev) => {
 
 console.log("Is user logged in?", userStore.isUserLogin);
 setTimeout(() => userStore.refreshToken(), 2000);
+
+// section: message
+const unreadMsgCount = ref(0);
+const getUnreadMsgCount = () =>
+  api.get("/user/messages/unread/count").then((resolve) => {
+    unreadMsgCount.value = resolve.data;
+  });
+const unreadMsgScheduler = () => {
+  if (userStore.isUserLogin) {
+    getUnreadMsgCount();
+    getUnreadMsg();
+  }
+  setTimeout(() => {
+    unreadMsgScheduler();
+  }, 5000);
+};
+onMounted(() => {
+  unreadMsgScheduler();
+});
+const unreadMsgData = reactive([
+  /*{senderId: "", content: "", senderProfileImg: "", timestamp: ""}*/
+]);
+
+const getUnreadMsg = () => {
+  unreadMsgData.length = 0;
+  api.get("/user/messages/unread").then((resolve) => {
+    if (!resolve.data.length) return;
+    resolve.data.map((l) => {
+      unreadMsgData.push({
+        senderId: `${l.senderUserIdProviderType},${l.senderUserIdUserLoginId}`,
+        content: l.content,
+        senderProfileImg: l.senderProfileImg,
+        timestamp: l.timestamp,
+      });
+    });
+  });
+};
+const msgDialogStatus = ref(false);
+const markAsRead = () => {};
+// end section: message
+
+// section: friend
+const friendList = reactive([
+  /*{id: "", profileImg: "", username: "", status: "", email:""}*/
+]);
+const getMyFriends = () => {
+  friendList.length = 0;
+  api.get("/user/friend/all").then((resolve) => {
+    if (!resolve.data) return;
+    resolve.data.map((l) => {
+      friendList.push({
+        id: `${l.addresseeUserIdProviderType},${l.addresseeUserIdUserLoginId}`,
+        profileImg: l.profileImg,
+        username: l.addresseeUsername,
+        email: l.addresseeDefaultEmail,
+        status: l.status,
+      });
+    });
+  });
+};
+const msgComponent = ref(false);
+const inputSearchUser = ref("");
+const searchByUsername = () => {
+  foundUserList.length = 0;
+  api.get(`/search/user/username/${inputSearchUser.value}`).then((resolve) => {
+    if (!resolve.data) return;
+    resolve.data.map((u) => {
+      foundUserList.push({
+        userId: u.userId,
+        username: u.username,
+        profileImage: u.profileImageUrl,
+        email: u.defaultEmail,
+      });
+    });
+  });
+};
+const foundUserList = reactive([
+  /*{ userId: "", username: "", profileImage: "", email: "" }*/
+]); // userId:prvTyp+","+id
+const addToFriend = (userId) => {
+  api
+    .post("/user/friend/request", {
+      addresseeId: userId,
+    })
+    .then((resolve) => {});
+};
+
+// section: friend
+
+// section: send message
+const selectedFriend = ref(""); // 현재 선택된 친구
+const msgToFriend = ref(""); // 현재 보낼 메시지
+const currentMsg = reactive([
+  /*{
+    senderId: "", senderUsername: "", senderProfileImg: "",
+    recipientId: "", recipientName: "", recipientProfileImg: "", content: "", timestamp: ""
+  }*/
+]); // 현재 보고있는 메시지
+const selectFriend = (id) => {
+  // 친구목록 창에서 친구 선택시 해당 친구에게 메시지 보낼 준비를함.
+  currentMsg.length = 0;
+  selectedFriend.value = id;
+  getFriendMsg(id);
+};
+const sendMsgToFriend = () => {
+  if (!selectedFriend.value || !msgToFriend.value) return;
+  const id = selectedFriend.value.split(",");
+  api
+    .post("/user/messages/send", {
+      recipientUserIdProviderType: id[0],
+      recipientUserIdUserLoginId: id[1],
+      content: msgToFriend.value,
+    })
+    .then((resolve) => {
+      msgToFriend.value = "";
+      selectFriend(selectedFriend.value);
+    })
+    .catch((reject) => {
+      msgToFriend.value = "";
+    });
+};
+const getFriendMsg = (id) => {
+  api
+    .get("/user/messages/conversation", {
+      params: {
+        recipientId: id,
+      },
+    })
+    .then((resolve) => {
+      resolve.data.map((m) => {
+        currentMsg.push({
+          senderId: `${m.senderUserIdProviderType},${m.senderUserIdUserLoginId}`,
+          senderUsername: m.senderName,
+          senderProfileImg: m.senderProfileImg,
+          recipientId: `${m.recipientUserIdProviderType},${m.recipientUserIdUserLoginId}`,
+          recipientName: m.recipientName,
+          recipientProfileImg: m.recipientProfileImg,
+          content: m.content,
+          timestamp: m.timestamp,
+        });
+      });
+    });
+};
+// end section: send message
 </script>
 
 <template>
@@ -174,6 +318,268 @@ setTimeout(() => userStore.refreshToken(), 2000);
             to="/"
           ></q-btn>
         </q-toolbar-title>
+
+        <!--        section: friend-->
+        <q-btn
+          v-if="userStore.isUserLogin"
+          dense
+          color="purple"
+          round
+          icon="people"
+          class="q-ml-md"
+          size="12px"
+          style="right: 11px"
+          @click="msgComponent = true"
+        />
+
+        <q-dialog v-model="msgComponent">
+          <q-card>
+            <q-card-section>
+              <div class="text-h6 text-center">Search User</div>
+            </q-card-section>
+            <q-separator />
+
+            <q-card-section>
+              <div>
+                <q-input
+                  v-model="inputSearchUser"
+                  filled
+                  type="search"
+                  :rules="[(v) => v.length > 0 || 'Cannot be empty']"
+                  lazy-rules
+                  maxlength="50"
+                >
+                  <template v-slot:append>
+                    <q-btn flat @click="searchByUsername">
+                      <q-icon name="search" />
+                    </q-btn>
+                  </template>
+                </q-input>
+              </div>
+            </q-card-section>
+            <q-separator />
+
+            <!--            검색된 사용자 목록-->
+            <q-card-section style="height: 50vh; width: 500px" class="scroll">
+              <q-list bordered class="rounded-borders" style="max-width: 600px">
+                <div v-for="u in foundUserList" :key="u.userId">
+                  <!--                <q-item-label header>Google Inbox style</q-item-label>-->
+                  <q-item>
+                    <q-item-section avatar top>
+                      <q-avatar>
+                        <img :src="u.profileImage" alt="no image" />
+                      </q-avatar>
+                    </q-item-section>
+
+                    <q-item-section top>
+                      <q-item-label lines="1">
+                        <span class="text-weight-medium">{{ u.username }}</span>
+                        <!--                        <span class="text-grey-8"> - GitHub repository</span>-->
+                      </q-item-label>
+                      <q-item-label caption lines="1">
+                        {{ u.email ? u.email : "..." }}
+                      </q-item-label>
+                    </q-item-section>
+
+                    <q-item-section top side>
+                      <div class="text-grey-8 q-gutter-xs">
+                        <q-btn
+                          class="gt-xs"
+                          size="12px"
+                          flat
+                          dense
+                          round
+                          icon="add"
+                          @click="
+                            () => {
+                              addToFriend(u.userId);
+                            }
+                          "
+                        />
+                        <!--                        <q-btn class="gt-xs" size="12px" flat dense round icon="done"/>-->
+                        <q-btn size="12px" flat dense round icon="more_vert" />
+                      </div>
+                    </q-item-section>
+                  </q-item>
+                  <q-separator spaced />
+                </div>
+              </q-list>
+            </q-card-section>
+            <q-separator />
+
+            <!--            <q-card-actions align="right">-->
+            <!--              <q-btn flat label="Decline" color="primary" v-close-popup/>-->
+            <!--              <q-btn flat label="Accept" color="primary" v-close-popup/>-->
+            <!--            </q-card-actions>-->
+          </q-card>
+        </q-dialog>
+        <!--        end section: friend-->
+
+        <!--        section: message-->
+        <q-btn
+          v-if="userStore.isUserLogin"
+          dense
+          color="purple"
+          round
+          icon="message"
+          class="q-ml-md"
+          size="12px"
+          style="right: 11px"
+        >
+          <!--          안읽은 메시지 카운트-->
+          <q-badge
+            v-if="unreadMsgCount > 0"
+            color="red"
+            rounded
+            floating
+            v-bind:label="unreadMsgCount"
+          ></q-badge>
+          <q-menu>
+            <!--            읽지않은 메시지 목록-->
+            <div class="q-pa-md" style="width: 350px">
+              <q-list>
+                <div v-for="msg in unreadMsgData" :key="msg.timestamp">
+                  <q-item>
+                    <q-item-section>
+                      <q-item-label>
+                        <q-avatar>
+                          <img :src="msg.senderProfileImg" alt="profile" />
+                        </q-avatar>
+                      </q-item-label>
+                      <q-item-label caption lines="2">{{
+                        msg.content
+                      }}</q-item-label>
+                    </q-item-section>
+                    <q-item-section side top>
+                      <q-item-label caption>{{ msg.timestamp }}</q-item-label>
+                    </q-item-section>
+                  </q-item>
+                  <q-separator spaced inset />
+                </div>
+              </q-list>
+            </div>
+
+            <!--            메시지 창-->
+            <div class="q-pa-md q-gutter-sm">
+              <q-btn
+                label="Message"
+                flat
+                color="primary"
+                @click="
+                  () => {
+                    msgDialogStatus = true;
+                    getMyFriends();
+                  }
+                "
+              />
+
+              <q-dialog v-model="msgDialogStatus">
+                <div class="row" style="width: 500px">
+                  <!--                  친구목록-->
+                  <div class="col-4">
+                    <q-card style="width: 100%; height: 100%">
+                      <q-card-section>
+                        <div class="text-h6">Friends List</div>
+                      </q-card-section>
+
+                      <q-separator />
+
+                      <q-card-section style="height: 56.2vh" class="scroll">
+                        <div v-for="f in friendList" :key="f.id">
+                          <q-item
+                            clickable
+                            v-ripple
+                            @click="
+                              () => {
+                                selectFriend(f.id);
+                              }
+                            "
+                          >
+                            <q-item-section side>
+                              <q-avatar rounded size="48px">
+                                <img
+                                  :src="f.profileImg"
+                                  alt="friend_prof_img"
+                                />
+                                <!--                                <q-badge floating color="teal">new</q-badge>-->
+                              </q-avatar>
+                            </q-item-section>
+                            <q-item-section>
+                              <q-item-label>{{ f.username }}</q-item-label>
+                              <!--                              <q-item-label caption>2 new messages</q-item-label>-->
+                            </q-item-section>
+                          </q-item>
+                        </div>
+                      </q-card-section>
+
+                      <q-separator />
+                    </q-card>
+                  </div>
+
+                  <!--                  메시지-->
+                  <div class="col-8">
+                    <q-card style="width: 300px; height: 100%">
+                      <q-card-section>
+                        <div class="text-h6">Message</div>
+                      </q-card-section>
+
+                      <q-separator />
+
+                      <q-card-section style="height: 50vh" class="scroll">
+                        <!--                        채팅-->
+                        <div class="q-pa-md row justify-center">
+                          <div style="width: 100%; max-width: 400px">
+                            <div
+                              v-for="chat in currentMsg"
+                              :key="chat.timestamp"
+                            >
+                              <q-chat-message
+                                :name="chat.senderUsername"
+                                :avatar="chat.senderProfileImg"
+                                :text="[chat.content]"
+                                :stamp="chat.timestamp"
+                                :sent="
+                                  chat.senderId ===
+                                  userStore.getProviderTypeAndLoginId
+                                "
+                                bg-color="amber-7"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </q-card-section>
+
+                      <q-input
+                        filled
+                        ref="msgInput"
+                        v-model="msgToFriend"
+                        type="text"
+                        maxlength="500"
+                      >
+                        <template v-slot:prepend>
+                          <q-icon name="message" />
+                        </template>
+                        <template v-slot:after>
+                          <q-btn
+                            ref="msgBtn"
+                            @click="sendMsgToFriend"
+                            outline
+                            color="secondary"
+                            round
+                            flat
+                            icon="send"
+                          />
+                        </template>
+                      </q-input>
+                    </q-card>
+                  </div>
+                </div>
+              </q-dialog>
+            </div>
+          </q-menu>
+        </q-btn>
+        <!--        end section: message-->
+
         <q-btn style="background: none" outline no-shadow label="Menu">
           <q-menu transition-show="jump-down" transition-hide="jump-up">
             <q-list style="min-width: 100px">
@@ -321,9 +727,9 @@ setTimeout(() => userStore.refreshToken(), 2000);
                   >
                     <q-chat-message name="GPT">
                       <div>{{ item.completion }}</div>
-                      <template v-slot:label>{{
-                        item.createdDate.value
-                      }}</template>
+                      <template v-slot:label
+                        >{{ item.createdDate.value }}
+                      </template>
                       <template v-slot:avatar>
                         <img
                           class="q-message-avatar q-message-avatar--sent"
@@ -333,12 +739,12 @@ setTimeout(() => userStore.refreshToken(), 2000);
                     </q-chat-message>
                     <q-chat-message sent>
                       <div>{{ item.prompt }}</div>
-                      <template v-slot:name>{{
-                        userStore.getUserName
-                      }}</template>
-                      <template v-slot:label>{{
-                        item.createdDate.value
-                      }}</template>
+                      <template v-slot:name
+                        >{{ userStore.getUserName }}
+                      </template>
+                      <template v-slot:label
+                        >{{ item.createdDate.value }}
+                      </template>
                       <template v-slot:avatar>
                         <img
                           class="q-message-avatar q-message-avatar--sent"
